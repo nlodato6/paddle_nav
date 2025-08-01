@@ -11,7 +11,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import platform
 
+if platform.system() == "Darwin":  # macOS
+    GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.11.3/lib/libgdal.dylib'
+    GEOS_LIBRARY_PATH = '/opt/homebrew/Cellar/geos/3.13.1/lib/libgeos_c.dylib'
+
+elif platform.system() == "Linux":
+    GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
+    GEOS_LIBRARY_PATH = '/usr/local/lib/libgeos_c.so'
+    
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
