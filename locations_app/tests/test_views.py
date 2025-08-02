@@ -3,15 +3,17 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from locations_app.models import RecreationArea, LocationCategory
 from django.contrib.gis.geos import Point
+from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
 class RecreationAreaAPITest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='tester', password='pass')
+        self.token = Token.objects.create(user=self.user)
         self.client = APIClient()
         self.client.login(username='tester', password='pass')
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
         self.category = LocationCategory.objects.create(name="Park")
 
         self.area = RecreationArea.objects.create(
