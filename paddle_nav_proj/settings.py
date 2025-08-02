@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import platform
+import platform, os
+from dotenv import load_dotenv
+
 
 if platform.system() == "Darwin":  # macOS
     GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.11.3/lib/libgdal.dylib'
@@ -23,6 +25,11 @@ elif platform.system() == "Linux":
     
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env file
+load_dotenv(dotenv_path=BASE_DIR / '.env')
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 # Quick-start development settings - unsuitable for production
@@ -50,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'locations_app',
+    'ai_tools',
 ]
 
 MIDDLEWARE = [

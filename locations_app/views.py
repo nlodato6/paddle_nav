@@ -1,12 +1,16 @@
 from django.shortcuts import render
-from rest_framework.views import APIView, Response
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import PermissionDenied
 from django.core.serializers import serialize
-from rest_framework import status 
 
 import json
 import requests
 
 from .models import RecreationArea, RecreationType, LocationCategory
+from .serializers import RecreationAreaSerializer
 
 
 class Alllocations(APIView):
@@ -51,4 +55,49 @@ class Alllocations(APIView):
                     processed_data.append(location_data)
             
             return Response(processed_data, status=status.HTTP_200_OK)
+
+#Users creating locations
+class CreateLocation(APIView):
+    """
+    APIView that allows authenticated users to create new RecreationArea entries.
+    The submitted location will be marked as user-submitted and not official data.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        data = request.data.copy()
+        data['submitted_by'] = request.user.id
+        data['is_official_data'] = False 
+
+        serializer = RecreationAreaSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#Users editing locations
+class EditLocation(APIView):
+    """
+    APIView that allows authenticated users to edit RecreationArea entries that they previously submitted.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, pk):
+        location = get_object_or_404(RecreationArea, pk=pk)
+
+        # can not edit official data
+        if location.is_official_data:
+            raise PermissionDenied("You can't edit official data.")
+
+        #Only allow users to edit their own submissions
+        if location.submitted_by != request.user:
+            raise PermissionDenied("You can only edit locations you submitted.")
+
+        serializer = RecreationAreaSerializer(location, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
      

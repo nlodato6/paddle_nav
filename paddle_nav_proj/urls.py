@@ -20,5 +20,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('fsp/', include('locations_app.urls')), # fsp = florida state parks
-    path('accounts/', include("accounts.urls"))
+    path('accounts/', include("accounts.urls")), # django auth
+    path("ai/", include("ai_tools.urls")), #gemini api
 ]
