@@ -9,7 +9,11 @@ def normalize_date_string(date_str):
     return date_str
 
 
-def get_tide_data(station_id, begin_date, end_date):
+def get_currents_data(station_id, begin_date, end_date):
+    """
+    This currently works but there is no data in the currents predictions on noaa.
+    """
+    
     begin_date = normalize_date_string(begin_date)
     end_date = normalize_date_string(end_date) if end_date else begin_date
 
@@ -17,12 +21,10 @@ def get_tide_data(station_id, begin_date, end_date):
 
     params = {
         "station": station_id,
-        "product": "predictions",
-        "datum": "MLLW",
+        "product": "currents_predictions",
         "units": "english",
         "time_zone": "lst_ldt",
         "format": "json",
-        "interval": "hilo",
         "begin_date": begin_date,
         "end_date": end_date,
     }
@@ -37,7 +39,7 @@ def get_tide_data(station_id, begin_date, end_date):
     return response.json()
 
 
-def parse_tide_data(raw_data):
+def parse_currents_data(raw_data):
     predictions = raw_data.get("predictions", [])
 
     result = []
@@ -52,15 +54,15 @@ def parse_tide_data(raw_data):
     return result
 
 
-def summarize_tides(station_id, begin_date, end_date):
+def summarize_currents(station_id, begin_date, end_date):
     normalized_begin_date = normalize_date_string(begin_date)
     normalized_end_date = normalize_date_string(end_date)
 
-    raw_data = get_tide_data(station_id, normalized_begin_date, normalized_end_date)
-    parsed_data = parse_tide_data(raw_data)
+    raw_data = get_currents_data(station_id, normalized_begin_date, normalized_end_date)
+    parsed_data = parse_currents_data(raw_data)
 
     if not parsed_data:
-        return f"No tide predictions available for {begin_date} {end_date}."
+        return f"No currents predictions available for {begin_date} {end_date}."
 
     formatted = []
     for entry in parsed_data:

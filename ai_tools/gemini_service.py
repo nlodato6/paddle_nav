@@ -22,7 +22,7 @@ def generate_text_from_prompt(prompt):
         f"{GEMINI_API_URL}?key={api_key}",
         headers=headers,
         json=payload,
-        timeout=15
+        timeout=60
     )
     response.raise_for_status()
     data = response.json()

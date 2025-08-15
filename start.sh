@@ -22,10 +22,10 @@ source "$VENV_DIR/bin/activate"
 # Change to the Django project directory
 # cd "$DJANGO_PROJECT_DIR" # This line is usually not needed if the script is run from the root
 
-echo "Deleting existing migration files..."
-rm -rf categories_app/migrations
-rm -rf posts_app/migrations
-echo "Existing migration files deleted."
+# echo "Deleting existing migration files..."
+# rm -rf categories_app/migrations
+# rm -rf posts_app/migrations
+# echo "Existing migration files deleted."
 
 docker compose up -d
 
