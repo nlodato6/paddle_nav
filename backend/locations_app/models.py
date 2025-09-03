@@ -38,6 +38,7 @@ class RecreationArea(models.Model):
     location_category = models.ForeignKey(LocationCategory, on_delete=models.SET_NULL, null=True, blank=True)
     recreation_type = models.ManyToManyField(RecreationType, blank=True, related_name='recreation_areas')
     submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,blank=True, null=True,related_name='submitted_locations')
+    favorited_by = models.ManyToManyField(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL, related_name='favorite_locations', blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 

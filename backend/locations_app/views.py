@@ -99,5 +99,31 @@ class EditLocation(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
-     
+
+class FavoriteLocation(APIView):
+    """
+    API view to allow user to favorite a RecreationArea.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            location = get_object_or_404(RecreationArea, pk=pk)
+            user = request.user
+
+            # Add the location to the user's favorite_locations list
+            # from the RecreationArea model's `favorited_by` ManyToMany field
+            # The 'favorited_by' is the related name we established.
+            user.favorite_locations.add(location)
+
+            return Response(
+                {"message": "Location added to favorites."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
