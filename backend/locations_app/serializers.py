@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.gis.geos import Point
-from .models import RecreationArea
+from .models import RecreationArea, Comment
 
 class RecreationAreaSerializer(serializers.ModelSerializer):
     geom = serializers.JSONField()
@@ -46,3 +46,11 @@ class RecreationAreaSerializer(serializers.ModelSerializer):
                 "coordinates": [instance.geom.x, instance.geom.y]
             }
         return representation
+
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['id', 'user', 'location', 'comment', 'added_at']
+        read_only_fields = ['id', 'user', 'added_at']
