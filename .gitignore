@@ -1,43 +1,4 @@
-# Exclude Git metadata
-.git
-
-# Exclude environment files and secrets
-.env
-*.env
-
-# Exclude compiled Python files
+venv
 __pycache__
-*.pyc
-*.pyo
-*.pyd
-
-# Exclude virtual environments
-venv/
-env/
-*.venv
-venv/bin/
-venv/include/
-venv/lib/
-venv/lib64/
-venv/share/
-
-# Exclude logs and cache
-*.log
-*.pid
-*.seed
-*.bak
-*.db
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Exclude build and artifact files
-dist/
-build/
-*.egg-info/
-*.tar.gz
-*.whl
->>>>>>> master
+.env
+work_to_do
