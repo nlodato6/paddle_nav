@@ -1,0 +1,30 @@
+#########################################
+# The "development" compose file builds 
+# the images locally
+#########################################
+
+version: "3"
+services:
+  api:
+    build: ./backend
+    depends_on:
+      - db
+  nginx:
+    build: 
+      context: .
+      dockerfile: ./webserver/Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=wines
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  postgres_data:
+    
