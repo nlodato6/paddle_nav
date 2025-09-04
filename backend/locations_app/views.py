@@ -7,7 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.serializers import serialize
 from django.contrib.gis.geos import Point
 from .serializers import RecreationAreaSerializer, CommentSerializer
-from .models import Favorite, Comment
+from .models import Favorite, Comment, RecreationArea
 
 
 import json
@@ -57,8 +57,43 @@ class Alllocations(APIView):
                 # add full location data to proccessed data
                 if location_data:
                     processed_data.append(location_data)
+        try:
+        # Query all objects from the recreationArea model
+            db_locations = RecreationArea.objects.all()
+
+            db_data = [{
+                    'id': loc.id,
+                    'name': loc.name,
+                    'description': loc.description,
+                    'geom': {
+                        'longitude': loc.geom.x,
+                        'latitude': loc.geom.y,
+                    } if loc.geom else None,
+                    'address': loc.address,
+                    'city': loc.city,
+                    'state': loc.state,
+                    'zip_code': loc.zip_code,
+                    'phone_number': loc.phone_number,
+                    'is_official_data': loc.is_official_data,
+                    'location_category': loc.location_category.name if loc.location_category else None,
+                    'recreation_types': [
+                        rec_type.name for rec_type in loc.recreation_type.all()
+                    ],
+                    'submitted_by': loc.submitted_by.username if loc.submitted_by else None,
+                    'favorited_by_count': loc.favorited_by.count(), # Returns a count of favorited users
+                    'date_added': loc.date_added.isoformat(),
+                    'last_updated': loc.last_updated.isoformat(),
+                } for loc in db_locations]
+        except Exception as e:
+                # Catch any database or serialization errors
+            return Response({"error": f"Failed to retrieve data from database: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # 3. COMBINE THE DATASETS
+
+        # Extend the processed_data list with the data from the database
+        processed_data.extend(db_data)
             
-            return Response(processed_data, status=status.HTTP_200_OK)
+        return Response(processed_data, status=status.HTTP_200_OK)
 
 
 class LocationDetail(APIView):
@@ -70,7 +105,7 @@ class LocationDetail(APIView):
         serializer = RecreationAreaSerializer(location)
         return Response(serializer.data)
 
-#Users creating locations
+
 class CreateLocation(APIView):
     """
     APIView that allows authenticated users to create new RecreationArea entries.
