@@ -38,7 +38,7 @@ class RecreationArea(models.Model):
     location_category = models.ForeignKey(LocationCategory, on_delete=models.SET_NULL, null=True, blank=True)
     recreation_type = models.ManyToManyField(RecreationType, blank=True, related_name='recreation_areas')
     submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,blank=True, null=True,related_name='submitted_locations')
-    favorited_by = models.ManyToManyField(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL, related_name='favorite_locations', blank=True, null=True)
+    favorited_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='favorite_locations', blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
@@ -55,7 +55,7 @@ class RecreationArea(models.Model):
 #Users can favorite locations and save them to a list 
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    location = models.ForeignKey(RecreationArea, on_delete=models.CASCADE, related_name='favorited_by')
+    location = models.ForeignKey(RecreationArea, on_delete=models.CASCADE, related_name='favorite_location')
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

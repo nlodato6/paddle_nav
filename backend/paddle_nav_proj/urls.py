@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/fsp/', include('locations_app.urls')), # fsp = florida state parks
     path('api/accounts/', include("accounts.urls")), # django auth
     path("api/ai_tools/", include("ai_tools.urls")), #gemini api
+    
 ]

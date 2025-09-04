@@ -60,6 +60,16 @@ class Alllocations(APIView):
             
             return Response(processed_data, status=status.HTTP_200_OK)
 
+
+class LocationDetail(APIView):
+    """
+    APIView to retrieve a single RecreationArea instance by ID.
+    """
+    def get(self, request, pk):
+        location = get_object_or_404(RecreationArea, pk=pk)
+        serializer = RecreationAreaSerializer(location)
+        return Response(serializer.data)
+
 #Users creating locations
 class CreateLocation(APIView):
     """
@@ -82,11 +92,11 @@ class CreateLocation(APIView):
         # Create the Point object from the coordinates
         data['geom'] = Point(float(longitude), float(latitude))
 
-        data['submitted_by'] = request.user.id
+        # data['submitted_by'] = request.user.id
         data['is_official_data'] = False 
 
 
-        serializer = RecreationAreaSerializer(data=data)
+        serializer = RecreationAreaSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -100,21 +110,46 @@ class EditLocation(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request, pk):
+        """Full Record Update"""
+        
         location = get_object_or_404(RecreationArea, pk=pk)
+        data = request.data.copy()
+        
+        # Create the Point object from the coordinates
+        longitude = data.get('longitude')
+        latitude = data.get('latitude')
+        if longitude is None or latitude is None:
+            return Response(
+                {"error": "Longitude and latitude are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        data['geom'] = Point(float(longitude), float(latitude))
 
-        # can not edit official data
+        # Can't edit official data or locations submitted by other users
         if location.is_official_data:
             raise PermissionDenied("You can't edit official data.")
-
-        #Only allow users to edit their own submissions
         if location.submitted_by != request.user:
             raise PermissionDenied("You can only edit locations you submitted.")
 
-        serializer = RecreationAreaSerializer(location, data=request.data)
-
+        # This is the corrected line: Pass the modified 'data' dictionary to the serializer.
+        serializer = RecreationAreaSerializer(location, data=data, context={'request': request})
+        
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        """ Partial Record Update """
+        location = get_object_or_404(RecreationArea, pk=pk)
+        
+        
+        serializer = RecreationAreaSerializer(location, data=request.data, partial=True, context={'request': request})
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class DeleteLocation(APIView):
@@ -140,7 +175,7 @@ class DeleteLocation(APIView):
 
         location.delete()
         
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Location deleted successfully."}, status=status.HTTP_200_OK)
     
 
 class FavoriteLocation(APIView):
