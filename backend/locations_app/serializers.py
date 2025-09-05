@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.gis.geos import Point
-from .models import RecreationArea, Comment
+from .models import RecreationArea, Comment, Favorite
 from rest_framework.fields import CurrentUserDefault
 
 class RecreationAreaSerializer(serializers.ModelSerializer):
@@ -22,10 +22,24 @@ class RecreationAreaSerializer(serializers.ModelSerializer):
             }
         return representation
 
-
+    def get_favorited_by(self, obj):
+        user_ids = [favorite.user.id for favorite in obj.favorites.all()]
+        return user_ids
 
 class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=CurrentUserDefault())
+    
     class Meta:
         model = Comment
         fields = ['id', 'user', 'location', 'comment', 'added_at']
         read_only_fields = ['id', 'user', 'added_at']
+
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=CurrentUserDefault())
+    location = RecreationAreaSerializer(read_only=True)
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'user', 'location']

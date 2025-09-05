@@ -2,6 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+import requests
+import openmeteo_requests
+import pandas as pd
+import requests_cache
+from retry_requests import retry
+import sys
+import json
+from datetime import datetime
 
 from .services.tides import get_tide_data, summarize_tides
 from .services.water_quality import get_water_atlas_data, summarize_water_atlas
@@ -137,6 +145,19 @@ class WaterAtlasData(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+
+
 class WeatherData(APIView):
-    def get(self, request):
+    """ DOES NOT WORK"""
+    def get():
+        """
+        fetch and process weather data using the Weather API client.
+        """
         pass
+        
+    def post(self, request):
+        """
+        Returns a Gemini summary of the provided 7-day weather forecast.
+        """
+        pass
+        

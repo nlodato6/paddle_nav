@@ -25,12 +25,13 @@ class RecreationType(models.Model):
     
 
 class RecreationArea(models.Model):
-    
+
+    OBJECTID = models.CharField(max_length=255, unique=True, null=True, blank=True)
     name = models.CharField(max_length=255, unique= True, blank=False, null=False)
     description = models.TextField(blank=True, null=True)
-    geom = models.PointField(srid=4326)
-    address = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=100)
+    geom = models.PointField(srid=4326, null=True)
+    address = models.CharField(max_length=255, blank=True, default=" ")
+    city = models.CharField(max_length=100, default= " ")
     state = models.CharField(max_length=2, default='FL',editable=False)
     zip_code = models.CharField(max_length=10, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
@@ -38,7 +39,7 @@ class RecreationArea(models.Model):
     location_category = models.ForeignKey(LocationCategory, on_delete=models.SET_NULL, null=True, blank=True)
     recreation_type = models.ManyToManyField(RecreationType, blank=True, related_name='recreation_areas')
     submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,blank=True, null=True,related_name='submitted_locations')
-    favorited_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='favorite_locations', blank=True, null=True)
+    favorited_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='favorite_locations', blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
