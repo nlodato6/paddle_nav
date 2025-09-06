@@ -27,6 +27,11 @@ export const loginUser = async (username, password) => {
   }
 };
 
+// Logout
+export const logout = () => {
+  localStorage.removeItem('token');
+};
+
 // Signup: create user and store token
 export const signupUser = async (username, email, password) => {
   try {

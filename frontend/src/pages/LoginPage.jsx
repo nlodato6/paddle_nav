@@ -18,7 +18,9 @@ export default function LoginPage() {
       });
       const token = res.data.token;
       localStorage.setItem("token", token); // Save token
+      localStorage.setItem("username", username); // Save username
       navigate("/"); // Redirect after login
+      window.location.reload();
     } catch (err) {
       console.error(err);
       setError("Invalid username or password");
