@@ -1,16 +1,17 @@
 from rest_framework import serializers
 from django.contrib.gis.geos import Point
-from .models import RecreationArea, Comment, Favorite
+from .models import RecreationArea, Comment
 from rest_framework.fields import CurrentUserDefault
 
 class RecreationAreaSerializer(serializers.ModelSerializer):
-
     submitted_by = serializers.HiddenField(default=CurrentUserDefault())
+    favorited_by_count = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = RecreationArea
         fields = '__all__'
-        read_only_fields = ['submitted_by', 'is_official_data']
+        read_only_fields = ['submitted_by', 'is_official_data', 'favorited_by_count', 'is_favorited']
 
     def to_representation(self, instance):
         """Serialize the Point to GeoJSON format."""
@@ -22,10 +23,18 @@ class RecreationAreaSerializer(serializers.ModelSerializer):
             }
         return representation
 
-    def get_favorited_by(self, obj):
-        user_ids = [favorite.user.id for favorite in obj.favorites.all()]
-        return user_ids
+    def get_favorited_by_count(self, obj):
+        """Return the number of users who favorited this location."""
+        return obj.favorited_by.count()
 
+    def get_is_favorited(self, obj):
+        """Return True if the current user has favorited this location."""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.favorited_by.filter(id=request.user.id).exists()
+        return False
+    
+    
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=CurrentUserDefault())
     
@@ -34,12 +43,3 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'location', 'comment', 'added_at']
         read_only_fields = ['id', 'user', 'added_at']
 
-
-
-class FavoriteSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=CurrentUserDefault())
-    location = RecreationAreaSerializer(read_only=True)
-
-    class Meta:
-        model = Favorite
-        fields = ['id', 'user', 'location']

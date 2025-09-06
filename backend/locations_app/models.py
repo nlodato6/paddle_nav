@@ -53,17 +53,6 @@ class RecreationArea(models.Model):
         if self.is_official_data and self.submitted_by:
             raise ValidationError("Official data should not have a submitted_by user.")
 
-#Users can favorite locations and save them to a list 
-class Favorite(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    location = models.ForeignKey(RecreationArea, on_delete=models.CASCADE, related_name='favorite_location')
-    added_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'location')
-
-    def __str__(self):
-        return f"{self.user.username} → {self.location.name}"
 
 #users can add comments to the locations
 class Comment(models.Model):

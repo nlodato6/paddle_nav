@@ -6,8 +6,9 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.core.serializers import serialize
 from django.contrib.gis.geos import Point
-from .serializers import RecreationAreaSerializer, CommentSerializer, FavoriteSerializer
-from .models import Favorite, Comment, RecreationArea
+from django.db import transaction
+from .serializers import RecreationAreaSerializer, CommentSerializer
+from .models import Comment, RecreationArea
 
 
 import json
@@ -87,12 +88,12 @@ class Alllocations(APIView):
                     'last_updated': loc.last_updated.isoformat(),
                 } for loc in db_locations]
         except Exception as e:
+
                 # Catch any database or serialization errors
             return Response({"error": f"Failed to retrieve data from database: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # 3. COMBINE THE DATASETS
+        #COMBINE THE DATASETS
 
-        # Extend the processed_data list with the data from the database
         processed_data.extend(db_data)
             
         return Response(processed_data, status=status.HTTP_200_OK)
@@ -217,145 +218,135 @@ class DeleteLocation(APIView):
 
 class FavoriteLocation(APIView):
     """
-    API view to allow a user to favorite a RecreationArea, either from
-    the local database or from an external API.
+    API view to favorite a RecreationArea, either from local DB or external API.
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk=None, *args, **kwargs):
         user = request.user
         OBJECTID = request.data.get('OBJECTID')
-        
+
         if not pk and not OBJECTID:
-            return Response({"error": "Either pk in URL or OBJECTID in body is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Either pk or OBJECTID is required."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
+        location = None
+
+        # Favorite by pk (already in DB)
         if pk:
-            try:
-                location = get_object_or_404(RecreationArea, pk=pk)
-            except RecreationArea.DoesNotExist:
-                return Response({"error": "Location not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+            location = get_object_or_404(RecreationArea, pk=pk)
+
+        # Favorite by OBJECTID (external API)
         elif OBJECTID:
-            try:
-                # Use the OBJECTID to find or create the location
-                location, created = RecreationArea.objects.get_or_create(OBJECTID=OBJECTID)
-                
-                # If a new object was just created, fetch and save the full API data
-                if created:
-                    api_url = f"https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0/query?where=OBJECTID={OBJECTID}&outFields=*&outSR=4326&f=json"
-                    api_response = requests.get(api_url, timeout=15)
-                    api_response.raise_for_status()
-                    arcgis_data = api_response.json()
-                    
-                    if not arcgis_data.get('features'):
-                        location.delete() # Clean up the empty object if API data is missing
-                        return Response({"error": "Official location not found."}, status=status.HTTP_404_NOT_FOUND)
+            location = RecreationArea.objects.filter(OBJECTID=OBJECTID).first()
+            if not location:
+                try:
+                    with transaction.atomic():
+                        api_url = (
+                            f"https://ca.dep.state.fl.us/arcgis/rest/services/"
+                            f"OpenData/PARKS_FORI/MapServer/0/query?where=OBJECTID={OBJECTID}"
+                            "&outFields=*&outSR=4326&f=json"
+                        )
+                        api_response = requests.get(api_url, timeout=15)
+                        api_response.raise_for_status()
+                        arcgis_data = api_response.json()
 
-                    feature = arcgis_data['features'][0]
-                    geometry = feature.get('geometry', {})
-                    
-                    if not geometry or 'x' not in geometry or 'y' not in geometry:
-                        location.delete() # Clean up the empty object
-                        return Response({"error": "Invalid geometry data from API."}, status=status.HTTP_400_BAD_REQUEST)
-                    
-                    location.name = feature.get('SITE_NAME', 'Unnamed Location')
-                    location.address = feature.get('LOCATION')
-                    location.city = feature.get('COUNTY')
-                    location.geom = Point(geometry['x'], geometry['y'])
-                    location.is_official_data = True
-                    location.save()
-            
-            except (requests.exceptions.RequestException, KeyError) as e:
-                return Response({"error": f"Failed to fetch official location data: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        else:
-            return Response({"error": "Either pk in URL or OBJECTID in body is required."}, status=status.HTTP_400_BAD_REQUEST)
-            
-        favorite_obj, created = Favorite.objects.get_or_create(user=user, location=location)
-        
-        if created:
-            message = "Location added to favorites."
+                        features = arcgis_data.get("features")
+                        if not features:
+                            return Response({"error": "Official location not found."},
+                                            status=status.HTTP_404_NOT_FOUND)
+
+                        feature = features[0]
+                        attrs = feature.get("attributes", {})
+                        geometry = feature.get("geometry", {})
+
+                        if not geometry or "x" not in geometry or "y" not in geometry:
+                            return Response({"error": "Invalid geometry data from API."},
+                                            status=status.HTTP_400_BAD_REQUEST)
+
+                        category_name = (attrs.get("MANAGING_AGENCY") or "").title()
+                        category = LocationCategory.objects.filter(name__iexact=category_name).first()
+
+                        location = RecreationArea.objects.create(
+                            OBJECTID=OBJECTID,
+                            name=attrs.get("SITE_NAME", "Unnamed Location"),
+                            description=attrs.get("DESCRIPTION") or "",
+                            address=attrs.get("LOCATION") or "",
+                            city=attrs.get("COUNTY") or "",
+                            state="FL",
+                            zip_code=attrs.get("ZIPCODE"),
+                            phone_number=attrs.get("PHONE"),
+                            geom=Point(geometry["x"], geometry["y"]),
+                            is_official_data=True,
+                            location_category=category,
+                            submitted_by=None,
+                        )
+
+                        # Add recreation types dynamically
+                        for key, value in attrs.items():
+                            if not value or str(value).strip() in ["0", ""]:
+                                continue
+                            rec_type, _ = RecreationType.objects.get_or_create(
+                                name=key,
+                                defaults={"description": key.replace("_", " ").title()}
+                            )
+                            location.recreation_type.add(rec_type)
+
+                except (requests.exceptions.RequestException, KeyError) as e:
+                    return Response({"error": f"Failed to fetch official location data: {e}"},
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Add user to favorites
+        if not location.favorited_by.filter(id=user.id).exists():
+            location.favorited_by.add(user)
             status_code = status.HTTP_201_CREATED
+            message = "Location added to favorites."
         else:
-            message = "Location is already in favorites."
             status_code = status.HTTP_200_OK
+            message = "Location is already in favorites."
 
-        return Response({"message": message}, status=status_code)
+        serializer = RecreationAreaSerializer(location, context={'request': request})
+        return Response({"message": message, "location": serializer.data}, status=status_code)
         
 
-class UnfavoriteLocation (APIView):
+class UnfavoriteLocation(APIView):
     """
-    API view to allow user to unfavorite a RecreationArea.
+    API view to unfavorite a RecreationArea.
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, pk):
-        try:
-            location = get_object_or_404(RecreationArea, pk=pk)
-            user = request.user
-            
-            user.favorite_locations.remove(location)
+        user = request.user
+        location = get_object_or_404(RecreationArea, pk=pk)
 
-            favorite_object = Favorite.objects.filter(user=user, location=location)
-            
-            if favorite_object.exists():
-                favorite_object.delete()
-                message = "Location removed from favorites."
-                status_code = status.HTTP_200_OK
-            else:
-                message = "Location is not in your favorites."
-                status_code = status.HTTP_404_NOT_FOUND
-                
-            return Response({"message": message}, status=status_code)
+        if location.favorited_by.filter(id=user.id).exists():
+            location.favorited_by.remove(user)
+            serializer = RecreationAreaSerializer(location, context={'request': request})
+            return Response({"message": "Location removed from favorites.", "location": serializer.data},
+                            status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Location was not in favorites."}, status=status.HTTP_404_NOT_FOUND)
 
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
 class UserFavoriteListView(APIView):
-
-    serializer_class = FavoriteSerializer
+    """
+    API view to list all RecreationAreas favorited by the current user.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-
         user = request.user
-        
-        # Query all Favorite objects for the current user.
-        favorites = Favorite.objects.filter(user=user).select_related('location')
-        
-        serializer = FavoriteSerializer(favorites, many=True)
-        
+        favorites = user.favorite_locations.all()  # reverse M2M relation
+        serializer = RecreationAreaSerializer(favorites, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+
 class CreateComment(APIView):
-    """
-    API view to allow authenticated users to create a new comment on a RecreationArea.
-    """
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, pk):
-        try:
-            location = get_object_or_404(RecreationArea, pk=pk)
-        except RecreationArea.DoesNotExist:
-            return Response({"error": "Location not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        data = request.data.copy()
-        data['user'] = request.user.id
-        data['location'] = location.id
-
-        serializer = CommentSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    pass
 
 class DeleteComment(APIView):
     """
-    API view to allow an authenticated user to delete their own comment.
+    API view to allow a user to delete their own comment.
     """
     permission_classes = [permissions.IsAuthenticated]
 
