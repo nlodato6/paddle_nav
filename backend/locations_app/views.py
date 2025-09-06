@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.core.serializers import serialize
@@ -22,9 +23,10 @@ class Alllocations(APIView):
     """
     APIView to fetch all park locations from the external Florida State Parks: Florida's Outdoor Recreation Inventory API.
     """
+    permission_classes = [AllowAny]
 
     def get(self, request):
-
+        
         # Florida's Outdoor Recreation Inventory API
         api_url = "https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
 
@@ -62,6 +64,7 @@ class Alllocations(APIView):
                 
         try:
         # Query all objects from the recreationArea model
+            
             db_locations = RecreationArea.objects.all()
 
             db_data = [{
@@ -103,7 +106,10 @@ class LocationDetail(APIView):
     """
     APIView to retrieve a single RecreationArea instance by ID.
     """
+    permission_classes = [AllowAny]
+
     def get(self, request, pk):
+    
         location = get_object_or_404(RecreationArea, pk=pk)
         serializer = RecreationAreaSerializer(location)
         return Response(serializer.data)

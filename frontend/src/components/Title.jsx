@@ -19,6 +19,8 @@ function Title() {
 
   const handleLogout = () => {
     logout();
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
     setIsLoggedIn(false);
     navigate("/"); // optional: redirect to home after logout
     setUsername("");

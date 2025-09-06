@@ -32,19 +32,21 @@ export const logout = () => {
   localStorage.removeItem('token');
 };
 
-// Signup: create user and store token
+// Signup: use path without trailing slash (matches your working URL)
 export const signupUser = async (username, email, password) => {
   try {
-    const res = await axios.post(`${ACCOUNTS_URL}/signup/`, {
+    const res = await axios.post(`${ACCOUNTS_URL}/signup`, {
       username,
       email,
       password,
     });
     const token = res.data.token;
-    localStorage.setItem('token', token);
+    // store token and username if backend returns them
+    localStorage.setItem("token", token);
+    localStorage.setItem("username", res.data.username ?? username);
     return token;
   } catch (error) {
-    console.error('Signup failed:', error);
+    console.error("Signup failed:", error.response?.data || error.message);
     throw error;
   }
 };
@@ -58,12 +60,10 @@ export const logoutUser = () => {
 // Fetch all locations
 export const getLocations = async () => {
   try {
-    const res = await axios.get(`${BASE_URL}/`, {
-      headers: getAuthHeaders(),
-    });
+    const res = await axios.get(`${BASE_URL}/`); // no headers here
     return res.data;
   } catch (error) {
-    console.error('Failed to fetch locations:', error);
+    console.error("Failed to fetch locations:", error.response?.data || error.message);
     throw error;
   }
 };

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { signupUser } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
 
-function SignupPage() {
+export default function SignupPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,7 +16,8 @@ function SignupPage() {
       const token = await signupUser(username, email, password);
       localStorage.setItem("username", username);
       localStorage.setItem("token", token);
-      window.location.reload(); // reload page to update navbar
+      window.location.reload(); // refresh navbar
+      navigate("/locations"); // redirect to Explore page
     } catch (err) {
       console.error("Signup failed:", err);
       setError("Signup failed. Try a different username or email.");
@@ -24,41 +25,41 @@ function SignupPage() {
   };
 
   return (
-    <div className="signup-page">
-      <h2>Sign Up</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleSignup}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Sign Up</button>
+    <div className="signup-page p-8 max-w-md mx-auto">
+      <h2 className="text-center text-2xl mb-4">Sign Up</h2>
+      {error && <p className="text-red-500 mb-2">{error}</p>}
+      <form onSubmit={handleSignup} className="flex flex-col gap-4">
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="p-2 border rounded"
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="p-2 border rounded"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="p-2 border rounded"
+          required
+        />
+        <button
+          type="submit"
+          className="p-2 bg-blue-500 text-grey rounded hover:bg-blue-600"
+        >
+          Sign Up
+        </button>
       </form>
     </div>
   );
 }
-
-export default SignupPage;

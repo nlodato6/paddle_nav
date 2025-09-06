@@ -19,7 +19,7 @@ export default function LoginPage() {
       const token = res.data.token;
       localStorage.setItem("token", token); // Save token
       localStorage.setItem("username", username); // Save username
-      navigate("/"); // Redirect after login
+      navigate("/locations"); // Redirect after login
       window.location.reload();
     } catch (err) {
       console.error(err);
@@ -50,7 +50,7 @@ export default function LoginPage() {
         />
         <button
           type="submit"
-          className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="p-2 bg-blue-500 text- rounded hover:bg-blue-600"
         >
           Login
         </button>
