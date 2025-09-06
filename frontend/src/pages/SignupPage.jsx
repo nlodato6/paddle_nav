@@ -16,8 +16,8 @@ export default function SignupPage() {
       const token = await signupUser(username, email, password);
       localStorage.setItem("username", username);
       localStorage.setItem("token", token);
-      window.location.reload(); // refresh navbar
       navigate("/locations"); // redirect to Explore page
+      window.location.reload(); // refresh navbar
     } catch (err) {
       console.error("Signup failed:", err);
       setError("Signup failed. Try a different username or email.");

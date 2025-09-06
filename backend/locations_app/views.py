@@ -21,86 +21,81 @@ from .serializers import RecreationAreaSerializer
 
 class Alllocations(APIView):
     """
-    APIView to fetch all park locations from the external Florida State Parks: Florida's Outdoor Recreation Inventory API.
+    APIView to fetch all park locations from the external Florida State Parks API
+    and combine with local database RecreationArea data.
     """
     permission_classes = [AllowAny]
 
     def get(self, request):
-        
-        # Florida's Outdoor Recreation Inventory API
-        api_url = "https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
-
-        api_response = requests.get(api_url, timeout=15)
-        api_response.raise_for_status() 
-        arcgis_data = api_response.json()
-
         processed_data = []
 
-        if 'features' in arcgis_data:
-            for feature in arcgis_data['features']:
-                location_data = {} 
-
-                #filters out the null fields
-                if 'attributes' in feature:
-                    original_attributes = feature['attributes']
-                
-                    filtered_attributes = {
-                        key: value
-                        for key, value in original_attributes.items()
-                        if value is not None #filtering nulls
-                    }
-                    
-                    location_data.update(filtered_attributes)
-                
-                #if recreation area has geometry add it to location data
-                if 'geometry' in feature and feature['geometry'] is not None:
-                        geometry = feature['geometry']                        
-                        location_data['geometry'] = geometry 
-
-                # add full location data to proccessed data
-                if location_data:
-                    processed_data.append(location_data)
-
-                
+        # 1. Fetch Florida Parks API data
         try:
-        # Query all objects from the recreationArea model
-            
-            db_locations = RecreationArea.objects.all()
+            api_url = "https://ca.dep.state.fl.us/arcgis/rest/services/OpenData/PARKS_FORI/MapServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
+            api_response = requests.get(api_url, timeout=15)
+            api_response.raise_for_status()
+            arcgis_data = api_response.json()
 
-            db_data = [{
+            # The Florida Parks API returns a list of features under 'features' OR sometimes directly
+            if isinstance(arcgis_data, dict) and 'features' in arcgis_data:
+                api_features = arcgis_data['features']
+            elif isinstance(arcgis_data, list):
+                api_features = arcgis_data
+            else:
+                api_features = []
+
+            for feature in api_features:
+                # Check if 'attributes' exist (older format) or use the dict directly
+                attrs = feature.get('attributes', feature)
+
+                location_data = {
+                    'id': attrs.get('ID'),
+                    'name': attrs.get('SITE_NAME'),
+                    'description': attrs.get('CATEGORY'),
+                    'address': attrs.get('LOCATION') or attrs.get('LOCATION_ADDRESS'),
+                    'city': attrs.get('LOCATION_CITY'),
+                    'state': attrs.get('LOCATION_STATE'),
+                    'zip_code': attrs.get('LOCATION_ZIP'),
+                    'latitude': attrs.get('DECIMAL_DEGREES_LAT'),
+                    'longitude': attrs.get('DECIMAL_DEGREES_LONG'),
+                    'geometry': feature.get('geometry'),
+                    'reports': attrs.get('REPORTS'),
+                }
+
+                processed_data.append(location_data)
+        except Exception as e:
+            # If API fails, just log but continue to fetch DB data
+            print(f"Florida Parks API error: {e}")
+
+        # 2. Fetch DB RecreationArea data
+        try:
+            db_locations = RecreationArea.objects.all()
+            for loc in db_locations:
+                processed_data.append({
                     'id': loc.id,
                     'name': loc.name,
                     'description': loc.description,
-                    'geom': {
-                        'longitude': loc.geom.x,
-                        'latitude': loc.geom.y,
-                    } if loc.geom else None,
                     'address': loc.address,
                     'city': loc.city,
+                    'county': loc.county,
                     'state': loc.state,
                     'zip_code': loc.zip_code,
+                    'latitude': loc.geom.y if loc.geom else None,
+                    'longitude': loc.geom.x if loc.geom else None,
+                    'geometry': {'x': loc.geom.x, 'y': loc.geom.y} if loc.geom else None,
                     'phone_number': loc.phone_number,
                     'is_official_data': loc.is_official_data,
                     'location_category': loc.location_category.name if loc.location_category else None,
-                    'recreation_types': [
-                        rec_type.name for rec_type in loc.recreation_type.all()
-                    ],
+                    'recreation_types': [rt.name for rt in loc.recreation_type.all()],
                     'submitted_by': loc.submitted_by.username if loc.submitted_by else None,
-                    'favorited_by_count': loc.favorited_by.count(), # Returns a count of favorited users
+                    'favorited_by_count': loc.favorited_by.count(),
                     'date_added': loc.date_added.isoformat(),
                     'last_updated': loc.last_updated.isoformat(),
-                } for loc in db_locations]
+                })
         except Exception as e:
-
-                # Catch any database or serialization errors
             return Response({"error": f"Failed to retrieve data from database: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        #COMBINE THE DATASETS
-
-        processed_data.extend(db_data)
-            
         return Response(processed_data, status=status.HTTP_200_OK)
-
 
 class LocationDetail(APIView):
     """

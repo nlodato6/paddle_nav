@@ -32,6 +32,7 @@ class RecreationArea(models.Model):
     geom = models.PointField(srid=4326, null=True)
     address = models.CharField(max_length=255, blank=True, default=" ")
     city = models.CharField(max_length=100, default= " ")
+    county = models.CharField(max_length=100, default= "n/a")
     state = models.CharField(max_length=2, default='FL',editable=False)
     zip_code = models.CharField(max_length=10, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
