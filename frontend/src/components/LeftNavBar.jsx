@@ -1,15 +1,16 @@
 import Stack from 'react-bootstrap/Stack';
+import { Link } from 'react-router-dom';
 
 function LeftNavBar() {
   return (
-    <Stack gap={3}>
-      <div className="p-2">Home </div>
-      <div className="p-2">Explore </div>
-      <div className="p-2">Saved </div>
-      <div className="p-2">Favorites </div>
+    <Stack gap={3} className="p-3">
+      <Link to="/" className="p-2 text-decoration-none text-dark">Home</Link>
+      <Link to="/locations" className="p-2 text-decoration-none text-dark">Explore</Link>
+      <Link to="/saved" className="p-2 text-decoration-none text-dark">Saved</Link>
+      <Link to="/favorites" className="p-2 text-decoration-none text-dark">Favorites</Link>
       <hr />
-      <div className="p-2">Profile </div>
-      <div className="p-2">Settings </div>
+      <Link to="/profile" className="p-2 text-decoration-none text-dark">Profile</Link>
+      <Link to="/settings" className="p-2 text-decoration-none text-dark">Settings</Link>
     </Stack>
   );
 }
