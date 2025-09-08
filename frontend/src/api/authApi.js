@@ -5,8 +5,24 @@ const BASE_URL = 'http://localhost:8000/api/fsp';
 const ACCOUNTS_URL = 'http://localhost:8000/api/accounts'; // adjust if different
 
 // Helper to get token from localStorage
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
+export const getToken = () => localStorage.getItem("token");
+export const getUsername = () => localStorage.getItem("username");
+
+export const setAuth = (token, username) => {
+  localStorage.setItem("token", token);
+  localStorage.setItem("username", username);
+};
+
+export const clearAuth = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  localStorage.removeItem("locations"); // optional: clear cached API data
+};
+
+export const isLoggedIn = () => !!getToken();
+
+export const getAuthHeaders = () => {
+  const token = getToken();
   return token ? { Authorization: `Token ${token}` } : {};
 };
 
@@ -81,7 +97,7 @@ export const getFavorites = async () => {
   }
 };
 
-// Favorite a location
+// Favorite a local DB location
 export const favoriteLocation = async (id) => {
   try {
     const res = await axios.post(`${BASE_URL}/locations/${id}/favorite/`, null, {
@@ -93,6 +109,21 @@ export const favoriteLocation = async (id) => {
     throw error;
   }
 };
+
+// Favorite an external API location (ArcGIS)
+export const favoriteOfficialLocation = async (OBJECTID) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/locations/api_favorite/`, { OBJECTID }, {
+      headers: getAuthHeaders(),
+    });
+    return res.data;
+  } catch (error) {
+    console.error(`Failed to favorite official location ${OBJECTID}:`, error);
+    throw error;
+  }
+};
+
+
 
 // Unfavorite a location
 export const unfavoriteLocation = async (id) => {

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { setAuth } from "../api/authApi";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -17,8 +18,7 @@ export default function LoginPage() {
         password,
       });
       const token = res.data.token;
-      localStorage.setItem("token", token); // Save token
-      localStorage.setItem("username", username); // Save username
+      setAuth(token, username);
       navigate("/locations"); // Redirect after login
       window.location.reload();
     } catch (err) {

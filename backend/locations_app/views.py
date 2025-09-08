@@ -18,6 +18,21 @@ import requests
 from .models import RecreationArea, RecreationType, LocationCategory
 from .serializers import RecreationAreaSerializer
 
+RECREATION_MAPPING = {
+    "S_USE_CANOE_KAYAK_TRAIL": "Canoe/Kayak Trail",
+    "FW_CANOE_KAYAK_LAUNCHES": "Canoe/Kayak Launch",
+    "SW_CANOE_KAYAK_LAUNCHES": "Canoe/Kayak Launch",
+    "FRESHWATER_BOAT_RAMPS": "Boat Ramps",
+    "SALTWATER_BOAT_RAMPS": "Boat Ramps",
+    "FRESHWATER_BEACHES": "Beaches",
+    "SALTWATER_BEACHES": "Beaches",
+    "FRESHWATER_BEACH_LENGTH": "Beaches",
+    "FRESHWATER_CATWALKS": "Catwalks",
+    "SALTWATER_CATWALKS": "Catwalks",
+    "FRESHWATER_PIERS": "Piers",
+    "SALTWATER_PIERS": "Piers",
+    "PARKING_AREAS": "Parking",
+}
 
 class Alllocations(APIView):
     """
@@ -47,19 +62,31 @@ class Alllocations(APIView):
             for feature in api_features:
                 # Check if 'attributes' exist (older format) or use the dict directly
                 attrs = feature.get('attributes', feature)
+                recreation_categories = []
 
+                #MAp recreations_cat
+                for key, category in RECREATION_MAPPING.items():
+                    if attrs.get(key):
+                        recreation_categories.append(category)
+                recreation_categories = list(set(recreation_categories))
+
+            
                 location_data = {
                     'id': attrs.get('ID'),
                     'name': attrs.get('SITE_NAME'),
                     'description': attrs.get('CATEGORY'),
                     'address': attrs.get('LOCATION') or attrs.get('LOCATION_ADDRESS'),
                     'city': attrs.get('LOCATION_CITY'),
+                    'county': attrs.get('LOCATION_COUNTY'),
                     'state': attrs.get('LOCATION_STATE'),
                     'zip_code': attrs.get('LOCATION_ZIP'),
                     'latitude': attrs.get('DECIMAL_DEGREES_LAT'),
                     'longitude': attrs.get('DECIMAL_DEGREES_LONG'),
                     'geometry': feature.get('geometry'),
+                    'is_official_data': True,
+                    'OBJECTID': attrs.get('OBJECTID'),
                     'reports': attrs.get('REPORTS'),
+                    'recreation_type': recreation_categories,
                 }
 
                 processed_data.append(location_data)
@@ -223,92 +250,77 @@ class FavoriteLocation(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, pk=None, *args, **kwargs):
+    def post(self, request, pk=None):
         user = request.user
-        OBJECTID = request.data.get('OBJECTID')
+        OBJECTID = request.data.get("OBJECTID")
 
         if not pk and not OBJECTID:
-            return Response({"error": "Either pk or OBJECTID is required."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Either pk or OBJECTID is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         location = None
 
-        # Favorite by pk (already in DB)
+        # Case 1: Favoriting by DB primary key
         if pk:
             location = get_object_or_404(RecreationArea, pk=pk)
 
-        # Favorite by OBJECTID (external API)
+        # Case 2: Favoriting by external API OBJECTID
         elif OBJECTID:
             location = RecreationArea.objects.filter(OBJECTID=OBJECTID).first()
             if not location:
+                # fetch from API and store locally if not exists
                 try:
-                    with transaction.atomic():
-                        api_url = (
-                            f"https://ca.dep.state.fl.us/arcgis/rest/services/"
-                            f"OpenData/PARKS_FORI/MapServer/0/query?where=OBJECTID={OBJECTID}"
-                            "&outFields=*&outSR=4326&f=json"
-                        )
-                        api_response = requests.get(api_url, timeout=15)
-                        api_response.raise_for_status()
-                        arcgis_data = api_response.json()
+                    api_url = (
+                        f"https://ca.dep.state.fl.us/arcgis/rest/services/"
+                        f"OpenData/PARKS_FORI/MapServer/0/query?where=OBJECTID={OBJECTID}"
+                        "&outFields=*&outSR=4326&f=json"
+                    )
+                    api_response = requests.get(api_url, timeout=15)
+                    api_response.raise_for_status()
+                    arcgis_data = api_response.json()
 
-                        features = arcgis_data.get("features")
-                        if not features:
-                            return Response({"error": "Official location not found."},
-                                            status=status.HTTP_404_NOT_FOUND)
-
-                        feature = features[0]
-                        attrs = feature.get("attributes", {})
-                        geometry = feature.get("geometry", {})
-
-                        if not geometry or "x" not in geometry or "y" not in geometry:
-                            return Response({"error": "Invalid geometry data from API."},
-                                            status=status.HTTP_400_BAD_REQUEST)
-
-                        category_name = (attrs.get("MANAGING_AGENCY") or "").title()
-                        category = LocationCategory.objects.filter(name__iexact=category_name).first()
-
-                        location = RecreationArea.objects.create(
-                            OBJECTID=OBJECTID,
-                            name=attrs.get("SITE_NAME", "Unnamed Location"),
-                            description=attrs.get("DESCRIPTION") or "",
-                            address=attrs.get("LOCATION") or "",
-                            city=attrs.get("COUNTY") or "",
-                            state="FL",
-                            zip_code=attrs.get("ZIPCODE"),
-                            phone_number=attrs.get("PHONE"),
-                            geom=Point(geometry["x"], geometry["y"]),
-                            is_official_data=True,
-                            location_category=category,
-                            submitted_by=None,
+                    features = arcgis_data.get("features")
+                    if not features:
+                        return Response(
+                            {"error": "Official location not found."},
+                            status=status.HTTP_404_NOT_FOUND
                         )
 
-                        # Add recreation types dynamically
-                        for key, value in attrs.items():
-                            if not value or str(value).strip() in ["0", ""]:
-                                continue
-                            rec_type, _ = RecreationType.objects.get_or_create(
-                                name=key,
-                                defaults={"description": key.replace("_", " ").title()}
-                            )
-                            location.recreation_type.add(rec_type)
+                    feature = features[0]
+                    attrs = feature.get("attributes", {})
+                    geometry = feature.get("geometry", {})
 
-                except (requests.exceptions.RequestException, KeyError) as e:
-                    return Response({"error": f"Failed to fetch official location data: {e}"},
-                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    location = RecreationArea.objects.create(
+                        OBJECTID=OBJECTID,
+                        name=attrs.get("SITE_NAME", "Unnamed Location"),
+                        description=attrs.get("DESCRIPTION") or "",
+                        address=attrs.get("LOCATION") or "",
+                        city=attrs.get("COUNTY") or "",
+                        state="FL",
+                        zip_code=attrs.get("ZIPCODE"),
+                        phone_number=attrs.get("PHONE"),
+                        geom=Point(geometry["x"], geometry["y"]) if geometry else None,
+                        is_official_data=True,
+                    )
 
-        # Add user to favorites
+                except requests.RequestException as e:
+                    return Response(
+                        {"error": f"Failed to fetch official location data: {e}"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+
+        # Add to favorites
         if not location.favorited_by.filter(id=user.id).exists():
             location.favorited_by.add(user)
-            status_code = status.HTTP_201_CREATED
             message = "Location added to favorites."
+            code = status.HTTP_201_CREATED
         else:
-            status_code = status.HTTP_200_OK
-            message = "Location is already in favorites."
+            message = "Location already in favorites."
+            code = status.HTTP_200_OK
 
-        serializer = RecreationAreaSerializer(location, context={'request': request})
-        return Response({"message": message, "location": serializer.data}, status=status_code)
-        
+        return Response({"message": message}, status=code)
 
 class UnfavoriteLocation(APIView):
     """
