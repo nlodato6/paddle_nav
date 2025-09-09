@@ -4,12 +4,11 @@ import { Routes, Route } from 'react-router-dom'; // REMOVE BrowserRouter here
 
 import Title from "./components/Title";
 import LeftNavBar from "./components/LeftNavBar";
-import Profile from "./components/profile";
-import User from "./components/user";
 
 import Home from "./pages/Home";
 import LoginPage from './pages/LoginPage';
 import SignupPage from "./pages/SignUpPage";
+import ProfilePage from "./pages/ProfilePage";
 
 import LocationsPage from "./pages/LocationsPage";
 import FavoritesPage from './pages/FavoritesPage';
@@ -30,6 +29,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/locations" element={<LocationsPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<div>Page Not Found</div>} />
             {/* <Route path="/users" element={<User />} />
             <Route path="/profiles" element={<Profile />} /> */}

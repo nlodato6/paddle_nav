@@ -8,8 +8,8 @@ function LeftNavBar() {
       <Link to="/locations" className="p-2 text-decoration-none text-dark">Explore</Link>
       <Link to="/favorites" className="p-2 text-decoration-none text-dark">Favorites</Link>
       <hr />
-      {/* <Link to="/profile" className="p-2 text-decoration-none text-dark">Profile</Link>
-      <Link to="/settings" className="p-2 text-decoration-none text-dark">Settings</Link> */}
+      <Link to="/profile" className="p-2 text-decoration-none text-dark">Profile</Link>
+      {/* <Link to="/settings" className="p-2 text-decoration-none text-dark">Settings</Link> */}
     </Stack>
   );
 }
