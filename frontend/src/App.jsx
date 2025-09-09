@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom'; // REMOVE BrowserRouter here
 
 import Title from "./components/Title";
 import LeftNavBar from "./components/LeftNavBar";
+import GeminiChat from "./components/GeminiChat";
 
 import Home from "./pages/Home";
 import LoginPage from './pages/LoginPage';
@@ -34,6 +35,7 @@ function App() {
             {/* <Route path="/users" element={<User />} />
             <Route path="/profiles" element={<Profile />} /> */}
           </Routes>
+          <GeminiChat />
         </div>
       </div>
     </>

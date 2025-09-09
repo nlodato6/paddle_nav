@@ -1,10 +1,9 @@
-// src/api/authApi.js
 import axios from 'axios';
 
 const BASE_URL = 'http://localhost:8000/api/fsp';
 const ACCOUNTS_URL = 'http://localhost:8000/api/accounts'; // adjust if different
 
-// Helper to get token from localStorage
+//get token from localStorage
 export const getToken = () => localStorage.getItem("token");
 export const getUsername = () => localStorage.getItem("username");
 
@@ -27,7 +26,7 @@ export const getAuthHeaders = () => {
 };
 
 // --- Authentication ---
-// Login: send username/password, store token
+// Login
 export const loginUser = async (username, password) => {
   try {
     const res = await axios.post(`${ACCOUNTS_URL}/api-token-auth/`, {
@@ -48,7 +47,7 @@ export const logout = () => {
   localStorage.removeItem('token');
 };
 
-// Signup: use path without trailing slash (matches your working URL)
+// Signup
 export const signupUser = async (username, email, password) => {
   try {
     const res = await axios.post(`${ACCOUNTS_URL}/signup`, {
@@ -138,6 +137,28 @@ export const unfavoriteLocation = async (id) => {
   }
 };
 
+// --- Gemini AI ---
+const GEMINI_URL = "http://localhost:8000/api/ai_tools/generate/";
+
+/**
+ * Send a prompt and user input to Gemini
+ * @param {string} prompt - the system prompt or preformatted text
+ * @param {string} userMessage - the user's message
+ * @returns {Promise<string>} - the generated response
+ */
+export const generateGeminiText = async (prompt, userMessage) => {
+  try {
+    const res = await axios.post(
+      GEMINI_URL,
+      { prompt, user_message: userMessage }, 
+      { headers: getAuthHeaders() } 
+    );
+    return res.data.response; 
+  } catch (error) {
+    console.error("Gemini request failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
 
 
 

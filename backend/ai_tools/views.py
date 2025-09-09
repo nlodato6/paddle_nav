@@ -2,14 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-import requests
-import openmeteo_requests
-import pandas as pd
-import requests_cache
-from retry_requests import retry
-import sys
-import json
-from datetime import datetime
+from django.conf import settings
 
 from .services.tides import get_tide_data, summarize_tides
 from .services.water_quality import get_water_atlas_data, summarize_water_atlas
@@ -21,16 +14,19 @@ class GeminiTextGenerate(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        prompt = request.data.get("prompt")
+        prompt = request.data.get("prompt") 
+        user_message = request.data.get("user_message")
+
         if not prompt:
             return Response({"error": "Prompt is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            generated_text = generate_text_from_prompt(prompt)
+            generated_text = generate_text_from_prompt(prompt, user_message=user_message)
             return Response({"response": generated_text}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+    
+    
 
 class TideData(APIView):
     """
