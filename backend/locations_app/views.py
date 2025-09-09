@@ -60,16 +60,18 @@ class Alllocations(APIView):
                 api_features = []
 
             for feature in api_features:
-                # Check if 'attributes' exist (older format) or use the dict directly
                 attrs = feature.get('attributes', feature)
-                recreation_categories = []
 
-                #MAp recreations_cat
+                #Map recreations_type
+                recreation_categories = []
                 for key, category in RECREATION_MAPPING.items():
                     if attrs.get(key):
                         recreation_categories.append(category)
                 recreation_categories = list(set(recreation_categories))
 
+                # Skip this location if no mapped recreation type exists
+                if not recreation_categories:
+                    continue 
             
                 location_data = {
                     'id': attrs.get('ID'),
