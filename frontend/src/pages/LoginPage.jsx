@@ -13,7 +13,7 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8000/api/accounts/api-token-auth/", {
+      const res = await axios.post("http://localhost/api/accounts/api-token-auth/", {
         username,
         password,
       });

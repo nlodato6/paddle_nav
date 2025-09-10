@@ -15,7 +15,7 @@ export default function ProfilePage() {
     // Fetch current user info
     const fetchUser = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/accounts/me", {
+        const res = await axios.get("http://localhost/api/accounts/me", {
           headers: { Authorization: `Token ${token}` },
         });
         setUsername(res.data.username);
@@ -39,7 +39,7 @@ export default function ProfilePage() {
 
     try {
       const res = await axios.patch(
-        "http://localhost:8000/api/accounts/me",
+        "http://localhost/api/accounts/me",
         { email, ...(password ? { password } : {}) },
         { headers: { Authorization: `Token ${token}` } }
       );

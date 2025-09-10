@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8000/api/fsp';
-const ACCOUNTS_URL = 'http://localhost:8000/api/accounts'; // adjust if different
+const BASE_URL = 'http://localhost/api/fsp';
+const ACCOUNTS_URL = 'http://localhost/api/accounts'; 
 
 //get token from localStorage
 export const getToken = () => localStorage.getItem("token");
@@ -15,7 +15,7 @@ export const setAuth = (token, username) => {
 export const clearAuth = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("username");
-  localStorage.removeItem("locations"); // optional: clear cached API data
+  localStorage.removeItem("locations"); 
 };
 
 export const isLoggedIn = () => !!getToken();
