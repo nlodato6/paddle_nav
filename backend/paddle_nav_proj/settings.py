@@ -39,7 +39,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 SECRET_KEY = 'django-insecure-#$+-nnrd3v4r5on0#@#6#^-kuhqmllo=io&vbt1ya0g!uf!su@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 

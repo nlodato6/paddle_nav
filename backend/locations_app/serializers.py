@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.contrib.gis.geos import Point
-from .models import RecreationArea, Comment
+from .models import RecreationArea, Comment, LocationCategory, RecreationType
 from rest_framework.fields import CurrentUserDefault
+
 
 class RecreationAreaSerializer(serializers.ModelSerializer):
     submitted_by = serializers.HiddenField(default=CurrentUserDefault())
@@ -11,7 +12,7 @@ class RecreationAreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecreationArea
         fields = '__all__'
-        read_only_fields = ['submitted_by', 'is_official_data', 'favorited_by_count', 'is_favorited']
+        read_only_fields = ['submitted_by', 'is_official_data', 'favorited_by_count', 'is_favorited', 'geom']
 
     def to_representation(self, instance):
         """Serialize the Point to GeoJSON format."""
@@ -34,6 +35,14 @@ class RecreationAreaSerializer(serializers.ModelSerializer):
             return obj.favorited_by.filter(id=request.user.id).exists()
         return False
     
+    # def create(self, validated_data):
+    #     """ Fix for Create Ggeom error"""
+    #     longitude = validated_data.pop("longitude", None)
+    #     latitude = validated_data.pop("latitude", None)
+    #     if longitude and latitude:
+    #         validated_data["geom"] = Point(float(longitude), float(latitude))
+    #     return super().create(validated_data)
+    
     
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=CurrentUserDefault())
@@ -43,3 +52,13 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'location', 'comment', 'added_at']
         read_only_fields = ['id', 'user', 'added_at']
 
+
+class LocationCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LocationCategory
+        fields = ["id", "name", "description"]
+
+class RecreationTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecreationType
+        fields = ["id", "name", "description"]

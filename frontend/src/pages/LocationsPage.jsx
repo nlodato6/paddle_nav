@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { getLocations } from "../api/authApi";
 import LocationCard from "../components/LocationCard";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  ButtonGroup,
+  Spinner,
+  Image,
+} from "react-bootstrap";
 
 export default function ListLocations() {
   const [locations, setLocations] = useState([]);
@@ -22,7 +31,6 @@ export default function ListLocations() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -34,65 +42,77 @@ export default function ListLocations() {
   });
 
   return (
-    <div>
-      <div className="flex gap-2 mb-4">
-        <h2 className="text-center"> 
-          <img
-            alt="logo"
-            src="/nav_logo.svg"
-            width="50"
-            height="50"
-            className="d-inline-block align-top"
-          />{" "}
-          Explore</h2>
+    <Container fluid className="py-5 bg-light min-vh-100">
+      <Container>
+        {/* Header */}
+        <Row className="align-items-center mb-4">
+          <Col xs="auto" className="d-flex align-items-center">
+            <Image
+              alt="logo"
+              src="/nav_logo.svg"
+              width={50}
+              height={50}
+              rounded
+              className="me-2"
+            />
+            <h2 className="fw-bold text-dark mb-0">Explore</h2>
+          </Col>
+        </Row>
 
-        <button
-          className={`px-4 py-2 rounded font-semibold ${
-            filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("all")}
-        >
-          All
-        </button>
-        <button
-          className={`px-4 py-2 rounded font-semibold ${
-            filter === "official" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("official")}
-        >
-          Official
-        </button>
-        <button
-          className={`px-4 py-2 rounded font-semibold ${
-            filter === "non-official" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("non-official")}
-        >
-          Non-Official
-        </button>
-        {token && (
-          <button
-            className={`px-4 py-2 rounded font-semibold ${
-              filter === "user" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
-            onClick={() => setFilter("user")}
-          >
-            My Locations
-          </button>
+        {/* Filter Buttons */}
+        <Row className="mb-4">
+          <Col>
+            <ButtonGroup>
+              <Button
+                variant={filter === "all" ? "primary" : "outline-secondary"}
+                onClick={() => setFilter("all")}
+              >
+                All
+              </Button>
+              <Button
+                variant={filter === "official" ? "primary" : "outline-secondary"}
+                onClick={() => setFilter("official")}
+              >
+                Official
+              </Button>
+              <Button
+                variant={
+                  filter === "non-official" ? "primary" : "outline-secondary"
+                }
+                onClick={() => setFilter("non-official")}
+              >
+                Non-Official
+              </Button>
+              {token && (
+                <Button
+                  variant={filter === "user" ? "primary" : "outline-secondary"}
+                  onClick={() => setFilter("user")}
+                >
+                  My Locations
+                </Button>
+              )}
+            </ButtonGroup>
+          </Col>
+        </Row>
+
+        {/* Loading or Locations Grid */}
+        {loading ? (
+          <div className="text-center my-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-3">Loading locations...</p>
+          </div>
+        ) : filteredLocations.length ? (
+          <Row xs={1} md={2} lg={3} className="g-4">
+            {filteredLocations.map((loc) => (
+              <Col key={loc.id}>
+                <LocationCard location={loc} />
+              </Col>
+            ))}
+          </Row>
+        ) : (
+          <p className="text-muted text-center mt-5">No locations found.</p>
         )}
-      </div>
-
-      {loading ? (
-        <p>Loading locations...</p>
-      ) : filteredLocations.length ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredLocations.map((loc) => (
-            <LocationCard key={loc.id} location={loc} />
-          ))}
-        </div>
-      ) : (
-        <p>No locations found.</p>
-      )}
-    </div>
+      </Container>
+    </Container>
   );
 }

@@ -1,15 +1,15 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework import status, permissions, viewsets
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.core.serializers import serialize
 from django.contrib.gis.geos import Point
 from django.db import transaction
-from .serializers import RecreationAreaSerializer, CommentSerializer
-from .models import Comment, RecreationArea
+from .serializers import RecreationAreaSerializer, LocationCategorySerializer, RecreationTypeSerializer
+from .models import Comment, RecreationArea, LocationCategory, RecreationType
 
 
 import json
@@ -141,24 +141,19 @@ class LocationDetail(APIView):
 
 class CreateLocation(APIView):
     """
-    APIView that allows authenticated users to create new RecreationArea entries.
-    The submitted location will be marked as user-submitted and not official data.
+    APIView that allows users to create new RecreationArea entries.
+    The submitted location will be marked as non-official
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         data = request.data.copy()
-        # create geom field for user entered locations
+
         longitude = data.get('longitude')
         latitude = data.get('latitude')
 
-        if longitude is None or latitude is None:
-            return Response(
-                {"error": "Longitude and latitude are required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        # Create the Point object from the coordinates
-        data['geom'] = Point(float(longitude), float(latitude))
+        if longitude and latitude:
+            data['geom'] = Point(float(longitude), float(latitude))
 
         # data['submitted_by'] = request.user.id
         data['is_official_data'] = False 
@@ -377,3 +372,14 @@ class DeleteComment(APIView):
         comment.delete()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# to pass to frontend for dropdowns
+class LocationCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = LocationCategory.objects.all()
+    serializer_class = LocationCategorySerializer
+    permission_classes = [permissions.AllowAny]
+
+class RecreationTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = RecreationType.objects.all()
+    serializer_class = RecreationTypeSerializer
+    permission_classes = [permissions.AllowAny]

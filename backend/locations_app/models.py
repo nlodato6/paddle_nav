@@ -67,3 +67,21 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} → {self.location.name} → {self.comment}"
+    
+
+
+class MetStation(models.Model):
+    station_id = models.CharField(max_length=10, primary_key=True)
+    name       = models.CharField(max_length=255)
+    state      = models.CharField(max_length=2, default='FL')
+    geom       = models.PointField(srid=4326, null=True, blank=True)
+    affiliations = models.CharField(max_length=255, blank=True, default="")
+    tidal        = models.BooleanField(default=False)
+    greatlakes   = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "met_station"
+        indexes = [models.Index(fields=["state"])]
+
+    def __str__(self):
+        return f"{self.station_id} - {self.name}"

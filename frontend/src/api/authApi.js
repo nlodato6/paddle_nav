@@ -35,6 +35,9 @@ export const loginUser = async (username, password) => {
     });
     const token = res.data.token;
     localStorage.setItem('token', token);
+
+    console.log("Saved token:", localStorage.getItem("token"));
+
     return token;
   } catch (error) {
     console.error('Login failed:', error);
@@ -135,6 +138,54 @@ export const unfavoriteLocation = async (id) => {
     console.error(`Failed to unfavorite location ${id}:`, error);
     throw error;
   }
+};
+
+//User Create new location
+export const createLocation = async (data) => {
+  const token = localStorage.getItem("token");
+  console.log("Using token:", token);
+
+  try {
+    const res = await axios.post(
+      `${BASE_URL}/locations/create/`,
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Token ${token}` } : {}),
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("CreateLocation failed:", error.response?.data || error);
+    throw error;
+  }
+};
+
+//-- Fetch from DB Tables
+// categories
+export async function getCategories() {
+  const res = await fetch(`${BASE_URL}/db/categories/`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch categories");
+  return res.json();
+}
+
+
+// recreation types
+export const getRecreationTypes = async () => {
+  const response = await fetch(`${BASE_URL}/db/recreation-types/`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) throw new Error("Failed to fetch recreation types");
+  return response.json();
 };
 
 // --- Gemini AI ---
