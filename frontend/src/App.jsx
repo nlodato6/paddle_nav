@@ -8,7 +8,7 @@ import GeminiChat from "./components/GeminiChat";
 
 import Home from "./pages/Home";
 import LoginPage from './pages/LoginPage';
-import SignupPage from "./pages/SignUpPage";
+import SignupPage from "./pages/SignupPage";
 import ProfilePage from "./pages/ProfilePage";
 
 import LocationsPage from "./pages/LocationsPage";

@@ -19,9 +19,9 @@ if platform.system() == "Darwin":  # macOS
     GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.11.3/lib/libgdal.dylib'
     GEOS_LIBRARY_PATH = '/opt/homebrew/Cellar/geos/3.13.1/lib/libgeos_c.dylib'
 
-elif platform.system() == "Linux":
-    GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
-    GEOS_LIBRARY_PATH = '/usr/local/lib/libgeos_c.so'
+# elif platform.system() == "Linux":
+#     GDAL_LIBRARY_PATH = '/usr/local/lib/libgdal.so'
+#     GEOS_LIBRARY_PATH = '/usr/local/lib/libgeos_c.so'
     
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +39,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 SECRET_KEY = 'django-insecure-#$+-nnrd3v4r5on0#@#6#^-kuhqmllo=io&vbt1ya0g!uf!su@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -107,8 +107,8 @@ DATABASES = {
         "NAME": "paddle_nav_db",
         "USER": "postgres",
         "PASSWORD": "postgres",
-        "HOST": "localhost",  
-        "PORT": 5454, # This is the port on the host machine (which will be mapped to 5432 in the container)
+        "HOST": "DB",  
+        "PORT": 5432, # This is the port on the host machine (which will be mapped to 5432 in the container)
     }
 }
 

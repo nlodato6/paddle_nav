@@ -1,4 +1,4 @@
-// src/pages/SignupPage.jsx
+
 import React, { useState } from "react";
 import { signupUser } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
