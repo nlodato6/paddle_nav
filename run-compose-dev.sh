@@ -20,5 +20,3 @@ Echo 'Migrations made'
 cd ./frontend 
 
 npm run dev
-
-echo 'Frontend running'
