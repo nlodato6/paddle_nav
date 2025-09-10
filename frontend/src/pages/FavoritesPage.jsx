@@ -39,7 +39,15 @@ function FavoritesPage() {
 
   return (
     <Container fluid className="mt-8">
-      <h2 className="text-center">My Favorites</h2>
+      <h2 className="text-center">
+        <img
+            alt="logo"
+            src="/favorites.png"
+            width="50"
+            height="50"
+            className="d-inline-block align-top"
+          />{" "}
+        My Favorites</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
         <ListFavorites />
       </div>

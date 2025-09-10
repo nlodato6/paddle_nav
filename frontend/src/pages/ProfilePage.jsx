@@ -55,7 +55,16 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-md mx-auto p-8">
-      <h2 className="text-2xl font-bold mb-4">Profile</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">
+           <img
+            alt="logo"
+            src="/profile.png"
+            width="50"
+            height="50"
+            className="d-inline-block align-top"
+          />{" "}
+        Profile</h2>
+        
       {message && <p className="text-green-500 mb-2">{message}</p>}
       {error && <p className="text-red-500 mb-2">{error}</p>}
 

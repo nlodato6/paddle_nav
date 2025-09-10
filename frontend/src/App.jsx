@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 
 import LocationsPage from "./pages/LocationsPage";
 import FavoritesPage from './pages/FavoritesPage';
+import MylocationsPage from "./pages/MyLocationsPage";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/" element={<Home />} />
             <Route path="/locations" element={<LocationsPage />} />
+            <Route path="/mylocations" element={<MylocationsPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<div>Page Not Found</div>} />

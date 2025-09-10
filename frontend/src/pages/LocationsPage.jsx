@@ -36,6 +36,16 @@ export default function ListLocations() {
   return (
     <div>
       <div className="flex gap-2 mb-4">
+        <h2 className="text-center"> 
+          <img
+            alt="logo"
+            src="/nav_logo.svg"
+            width="50"
+            height="50"
+            className="d-inline-block align-top"
+          />{" "}
+          Explore</h2>
+
         <button
           className={`px-4 py-2 rounded font-semibold ${
             filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
