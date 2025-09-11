@@ -113,16 +113,14 @@ export const favoriteLocation = async (id) => {
 };
 
 // Favorite an external API location (ArcGIS)
-export const favoriteOfficialLocation = async (OBJECTID) => {
-  try {
-    const res = await axios.post(`${BASE_URL}/locations/api_favorite/`, { OBJECTID }, {
-      headers: getAuthHeaders(),
-    });
-    return res.data;
-  } catch (error) {
-    console.error(`Failed to favorite official location ${OBJECTID}:`, error);
-    throw error;
-  }
+export const favoriteOfficialLocation = async (objectId) => {
+  const token = localStorage.getItem("token");
+  const res = await axios.post(
+    `${API_URL}/official-locations/${objectId}/favorite/`,
+    {},
+    { headers: { Authorization: `Token ${token}` } }
+  );
+  return res.data;
 };
 
 
@@ -160,6 +158,25 @@ export const createLocation = async (data) => {
   } catch (error) {
     console.error("CreateLocation failed:", error.response?.data || error);
     throw error;
+  }
+};
+
+//Update User made locations
+export const editLocation = async (id, data, { method = "patch" } = {}) => {
+  const token = localStorage.getItem("token");
+  const url = `${BASE_URL}/locations/${id}/edit/`;
+
+  const headers = {
+    Authorization: `Token ${token}`,
+    "Content-Type": "application/json",
+  };
+
+  if (method.toLowerCase() === "put") {
+    const res = await axios.put(url, data, { headers });
+    return res.data;
+  } else {
+    const res = await axios.patch(url, data, { headers });
+    return res.data;
   }
 };
 

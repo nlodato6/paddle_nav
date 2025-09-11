@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { getLocations } from "../api/authApi";
 import LocationCard from "../components/LocationCard";
 import CreateLocationsForm from "../components/CreateLocationForm";
+import EditLocationForm from "../components/EditLocationForm"; // ✅ import the edit form
 import { Container, Row, Col, Button, Spinner, Card } from "react-bootstrap";
 
 export default function MyLocations() {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false); //create location form
+  const [showForm, setShowForm] = useState(false); // create location form
+  const [editingLocation, setEditingLocation] = useState(null); // edit location form
 
   const username = localStorage.getItem("username");
 
@@ -64,9 +66,23 @@ export default function MyLocations() {
           <div className="mb-5">
             <CreateLocationsForm
               onSuccess={() => {
-                fetchLocations(); 
-                setShowForm(false); 
+                fetchLocations();
+                setShowForm(false);
               }}
+            />
+          </div>
+        )}
+
+        {/* Show Edit Form */}
+        {editingLocation && (
+          <div className="mb-5">
+            <EditLocationForm
+              location={editingLocation}
+              onSuccess={() => {
+                fetchLocations();
+                setEditingLocation(null);
+              }}
+              onCancel={() => setEditingLocation(null)}
             />
           </div>
         )}
@@ -82,13 +98,17 @@ export default function MyLocations() {
           <Row xs={1} md={2} lg={3} className="g-4">
             {locations.map((loc) => (
               <Col key={loc.id}>
-                <LocationCard location={loc} />
+                <LocationCard
+                  location={loc}
+                  onEdit={setEditingLocation} // ✅ handle edit click
+                  showEdit={username && !loc.is_official_data} // ✅ only show if user + non-official
+                />
               </Col>
             ))}
           </Row>
         ) : (
           /* Empty State */
-          !showForm && ( // Only show empty state if form isn't visible
+          !showForm && !editingLocation && ( // Only show empty state if no forms are visible
             <Card className="text-center p-5 shadow-sm">
               <Card.Body>
                 <Card.Text className="text-muted mb-4">

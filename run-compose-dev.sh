@@ -38,6 +38,8 @@ Echo 'DB loaded'
 
 #start frontend
 Echo 'Starting Frontend'
-cd ./frontend 
 
+cd ./frontend 
+npm install
+npm audit
 npm run dev

@@ -3,12 +3,11 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { generateGeminiText } from "../api/authApi";
 
-
 export default function FloatingChat() {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [chatMessages, setChatMessages] = useState([
-    { user: null, bot: "Hello! How can I help you today?" }
+    { user: null, bot: "Hello! How can I help you today?" },
   ]);
 
   const toggleChat = () => setOpen(!open);
@@ -23,14 +22,20 @@ export default function FloatingChat() {
 
     try {
       const aiResponse = await generateGeminiText(userMessage);
-      setChatMessages(prev => [
-        ...prev.map(msg => (msg.bot === null ? { ...msg, bot: aiResponse } : msg))
-      ]);
+      setChatMessages((prev) =>
+        prev.map((msg) =>
+          msg.bot === null ? { ...msg, bot: aiResponse } : msg
+        )
+      );
     } catch (error) {
       console.error("Error sending message to Gemini:", error);
-      setChatMessages(prev => [
-        ...prev.map(msg => (msg.bot === null ? { ...msg, bot: "Error: could not get response." } : msg))
-      ]);
+      setChatMessages((prev) =>
+        prev.map((msg) =>
+          msg.bot === null
+            ? { ...msg, bot: "Error: could not get response." }
+            : msg
+        )
+      );
     }
   };
 
@@ -39,43 +44,56 @@ export default function FloatingChat() {
       {/* Chat Window */}
       {open && (
         <div
-          className="card shadow"
+          className="card shadow position-fixed d-flex flex-column"
           style={{
             width: "300px",
             height: "400px",
-            position: "fixed",
             bottom: "70px",
             right: "20px",
             zIndex: 1050,
-            display: "flex",
-            flexDirection: "column",
           }}
         >
-          <div className="card-header d-flex justify-content-between align-items-center bg-primary text-white">
-            Chat with Gemini
+          {/* Header */}
+          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span>Chat with Gemini</span>
             <button
               type="button"
-              className="btn btn-sm btn-light"
+              className="btn-close btn-close-white"
+              aria-label="Close"
               onClick={toggleChat}
-            >
-              ✕
-            </button>
+            ></button>
           </div>
 
-          {/* Chat messages */}
-          <div
-            className="card-body overflow-auto flex-grow-1"
-            style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-          >
-            {chatMessages.map((msg, index) => (
-              <div key={index}>
-                {msg.user && <div className="text-end"><span className="badge bg-primary">{msg.user}</span></div>}
-                {msg.bot && <div className="text-start"><span className="badge bg-secondary">{msg.bot}</span></div>}
-              </div>
-            ))}
-          </div>
+          {/* Messages */}
+          <div className="card-body overflow-auto flex-grow-1 d-flex flex-column gap-2">
+          {chatMessages.map((msg, index) => (
+            <div key={index}>
+              {msg.user && (
+                <div className="text-end">
+                  <div
+                    className="alert alert-primary d-inline-block text-break mb-1 py-1 px-2"
+                    style={{ maxWidth: "80%", whiteSpace: "pre-wrap" }}
+                  >
+                    {msg.user}
+                  </div>
+                </div>
+              )}
+              {msg.bot && (
+                <div className="text-start">
+                  <div
+                    className="alert alert-secondary d-inline-block text-break mb-1 py-1 px-2"
+                    style={{ maxWidth: "80%", whiteSpace: "pre-wrap" }}
+                  >
+                    {msg.bot}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
-          {/* Input field */}
+
+          {/* Input */}
           <div className="card-footer">
             <form onSubmit={handleSubmit}>
               <div className="input-group">
@@ -95,12 +113,11 @@ export default function FloatingChat() {
         </div>
       )}
 
-      {/* Floating "?" Button */}
+      {/* Floating Button */}
       <button
         type="button"
-        className="btn btn-primary rounded-circle shadow"
+        className="btn btn-primary rounded-circle shadow position-fixed"
         style={{
-          position: "fixed",
           bottom: "20px",
           right: "20px",
           width: "50px",
