@@ -13,14 +13,16 @@ from .views import (
     UserFavoriteListView,
     LocationCategoryViewSet,
     RecreationTypeViewSet,
+    MetStationListViewSet,
 )
 
 router = DefaultRouter()
 router.register(r"categories", LocationCategoryViewSet)
 router.register(r"recreation-types", RecreationTypeViewSet)
+router.register(r"metstations", MetStationListViewSet)
 
 urlpatterns = [
-    # Currently only takes GET requests
+    
     path("db/", include(router.urls)),
 
     path('', Alllocations.as_view(), name='all_locations'),

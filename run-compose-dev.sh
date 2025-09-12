@@ -41,5 +41,6 @@ Echo 'Starting Frontend'
 
 cd ./frontend 
 npm install
-npm audit
+npm audit fix
+npm install recharts
 npm run dev

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 function LeftNavBar() {
   return (
     <Stack gap={3} className="p-3">
-      <Link to="/" className="p-2 text-decoration-none text-dark">
+      {/* <Link to="/" className="p-2 text-decoration-none text-dark">
         <img
             alt="logo"
             src="/home.png"
@@ -12,18 +12,28 @@ function LeftNavBar() {
             height="25"
             className="d-inline-block align-top"
           />{" "}
-      Home</Link>
+      Home</Link> */}
 
 
       <Link to="/locations" className="p-2 text-decoration-none text-dark"> 
       <img
             alt="logo"
-            src="/nav_logo.svg"
+            src="/explore.png"
             width="25"
             height="25"
             className="d-inline-block align-top"
           />{" "} 
           Explore</Link>
+
+          <Link to="/conditions" className="p-2 text-decoration-none text-dark"> 
+      <img
+            alt="logo"
+            src="/water.png"
+            width="25"
+            height="25"
+            className="d-inline-block align-top"
+          />{" "} 
+          Coastal Conditions</Link>
 
       <Link to="/mylocations" className="p-2 text-decoration-none text-dark">
       <img

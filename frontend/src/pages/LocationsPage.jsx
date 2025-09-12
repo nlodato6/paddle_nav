@@ -43,13 +43,13 @@ export default function ListLocations() {
 
   return (
     <Container fluid className="py-5 bg-light min-vh-100">
-      <Container>
-        {/* Header */}
+      
+        {/* Title */}
         <Row className="align-items-center mb-4">
           <Col xs="auto" className="d-flex align-items-center">
             <Image
               alt="logo"
-              src="/nav_logo.svg"
+              src="/explore.png"
               width={50}
               height={50}
               rounded
@@ -112,7 +112,7 @@ export default function ListLocations() {
         ) : (
           <p className="text-muted text-center mt-5">No locations found.</p>
         )}
-      </Container>
+  
     </Container>
   );
 }

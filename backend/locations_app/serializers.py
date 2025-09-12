@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.gis.geos import Point
-from .models import RecreationArea, Comment, LocationCategory, RecreationType
+from .models import RecreationArea, Comment, LocationCategory, RecreationType, MetStation
 from rest_framework.fields import CurrentUserDefault
 
 
@@ -62,3 +62,12 @@ class RecreationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecreationType
         fields = ["id", "name", "description"]
+
+
+class MetStationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetStation
+        fields = ["station_id", "name"]
+
+
+

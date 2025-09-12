@@ -41,8 +41,7 @@ export default function FavoritesPage() {
   if (!token) {
     return (
       <Container fluid className="bg-light min-vh-100 py-5">
-        <Container>
-          <Row className="align-items-center mb-4">
+  
             <Col className="d-flex align-items-center">
               <img
                 alt="logo"
@@ -53,7 +52,7 @@ export default function FavoritesPage() {
               />
               <h2 className="fw-bold text-dark m-0">Favorites</h2>
             </Col>
-          </Row>
+         
           <Card className="text-center p-5 shadow-sm">
             <Card.Body>
               <Card.Text className="text-muted mb-4">
@@ -61,15 +60,15 @@ export default function FavoritesPage() {
               </Card.Text>
             </Card.Body>
           </Card>
-        </Container>
+        
       </Container>
     );
   }
 
   return (
     <Container fluid className="bg-light min-vh-100 py-5">
-      <Container>
-        {/* Header */}
+        
+        {/*Title */}
         <Row className="align-items-center mb-4">
           <Col className="d-flex align-items-center">
             <img
@@ -92,7 +91,7 @@ export default function FavoritesPage() {
           </Card>
         )}
 
-        {/* Loading */}
+        {/* Page Loading */}
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" variant="secondary" role="status" />
@@ -104,7 +103,7 @@ export default function FavoritesPage() {
             <ListFavorites favorites={favorites} />
           </Row>
         ) : (
-          /* Empty state */
+          /* No favorites */
           <Card className="text-center p-5 shadow-sm">
             <Card.Body>
               <Card.Text className="text-muted mb-4">
@@ -116,7 +115,7 @@ export default function FavoritesPage() {
             </Card.Body>
           </Card>
         )}
-      </Container>
+      
     </Container>
   );
 }

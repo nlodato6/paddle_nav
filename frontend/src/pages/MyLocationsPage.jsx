@@ -41,8 +41,8 @@ export default function MyLocations() {
 
   return (
     <Container fluid className="bg-light min-vh-100 py-5">
-      <Container>
-        {/* Header */}
+     
+        {/* Title */}
         <Row className="align-items-center mb-4">
           <Col className="d-flex align-items-center">
             <img
@@ -54,6 +54,7 @@ export default function MyLocations() {
             />
             <h2 className="fw-bold text-dark m-0">My Locations</h2>
           </Col>
+          
           <Col className="text-end">
             <Button variant="primary" onClick={handleCreateClick}>
               {showForm ? "Cancel" : "Create New Location"}
@@ -121,7 +122,7 @@ export default function MyLocations() {
             </Card>
           )
         )}
-      </Container>
+      
     </Container>
   );
 }

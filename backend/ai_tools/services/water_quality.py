@@ -74,8 +74,8 @@ def summarize_water_atlas(station_id):
         f"Here are water quality concerns for station {station_id}:\n\n"
         f"{water_quality_concerns_text}\n\n"
         f"Please summarize these water quality concerns. Include the characteristic, station, "
-        f"latest sample time, and a brief description for each. "
         f"If there are multiple concerns, group them logically and highlight any significant issues."
+        f"Provide a Key take aways sections and return that at the top and include a for more information please visit https://pinellas.wateratlas.usf.edu/maps/coastal-water-quality-map/ at the bottom of every response"
     )
     print(prompt)
     return generate_text_from_prompt(prompt)

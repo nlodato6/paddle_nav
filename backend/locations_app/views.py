@@ -8,8 +8,8 @@ from django.core.exceptions import PermissionDenied
 from django.core.serializers import serialize
 from django.contrib.gis.geos import Point
 from django.db import transaction
-from .serializers import RecreationAreaSerializer, LocationCategorySerializer, RecreationTypeSerializer
-from .models import Comment, RecreationArea, LocationCategory, RecreationType
+from .serializers import RecreationAreaSerializer, LocationCategorySerializer, RecreationTypeSerializer, MetStationSerializer
+from .models import Comment, RecreationArea, LocationCategory, RecreationType, MetStation
 
 
 import json
@@ -373,6 +373,10 @@ class DeleteComment(APIView):
         
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+
+
+
 # to pass to frontend for dropdowns
 class LocationCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = LocationCategory.objects.all()
@@ -383,3 +387,8 @@ class RecreationTypeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = RecreationType.objects.all()
     serializer_class = RecreationTypeSerializer
     permission_classes = [permissions.AllowAny]
+
+class MetStationListViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MetStation.objects.all()
+    serializer_class = MetStationSerializer
+    permission_classes = [permissions.AllowAny]  

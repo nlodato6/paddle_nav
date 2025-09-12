@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost/api/fsp';
 const ACCOUNTS_URL = 'http://localhost/api/accounts'; 
+const AI_TOOLS_URL = 'http://localhost/api/ai_tools'; 
 
 //get token from localStorage
 export const getToken = () => localStorage.getItem("token");
@@ -204,6 +205,71 @@ export const getRecreationTypes = async () => {
   if (!response.ok) throw new Error("Failed to fetch recreation types");
   return response.json();
 };
+
+// metstations
+export const getMetStations = async () => {
+  try {
+    const res = await axios.get(`${BASE_URL}/db/metstations/`);
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch metstations:", error);
+    throw error;
+  }
+};
+
+//Tide summary
+export async function getTideSummary(stationId, beginDate, endDate) {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.post(
+      `${AI_TOOLS_URL}/tides/`,
+      {
+        station_id: stationId,
+        begin_date: beginDate,
+        end_date: endDate,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Token ${token}` : undefined,
+        },
+      }
+    );
+
+    return response.data; // Gemini summary text
+  } catch (error) {
+    console.error("Error fetching tide summary:", error);
+    throw error;
+  }
+}
+
+// Water atlas
+export async function getWaterAtlasSummary(stationId, beginDate, endDate) {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.post(
+      `${AI_TOOLS_URL}/water_atlas/`,
+      {
+        station_id: stationId,
+        begin_date: beginDate,
+        end_date: endDate,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Token ${token}` : undefined,
+        },
+      }
+    );
+
+    return response.data; // Gemini summary text
+  } catch (error) {
+    console.error("Error fetching Water Atlas summary:", error);
+    throw error;
+  }
+}
 
 // --- Gemini AI ---
 const GEMINI_URL = "http://localhost:8000/api/ai_tools/generate/";
