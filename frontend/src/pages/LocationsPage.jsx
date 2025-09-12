@@ -64,20 +64,20 @@ export default function ListLocations() {
           <Col>
             <ButtonGroup>
               <Button
-                variant={filter === "all" ? "primary" : "outline-secondary"}
+                variant={filter === "all" ? "info" : "outline-secondary"}
                 onClick={() => setFilter("all")}
               >
                 All
               </Button>
               <Button
-                variant={filter === "official" ? "primary" : "outline-secondary"}
+                variant={filter === "official" ? "info" : "outline-secondary"}
                 onClick={() => setFilter("official")}
               >
                 Official
               </Button>
               <Button
                 variant={
-                  filter === "non-official" ? "primary" : "outline-secondary"
+                  filter === "non-official" ? "info" : "outline-secondary"
                 }
                 onClick={() => setFilter("non-official")}
               >

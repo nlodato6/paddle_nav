@@ -1,7 +1,7 @@
-
 import React, { useState } from "react";
 import { signupUser } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
+import { Container, Card, Form, Button, Alert } from "react-bootstrap";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");
@@ -12,10 +12,12 @@ export default function SignupPage() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setError(null);
     try {
       const token = await signupUser(username, email, password);
       localStorage.setItem("username", username);
       localStorage.setItem("token", token);
+
       navigate("/locations"); // redirect to Explore page
       window.location.reload(); // refresh navbar
     } catch (err) {
@@ -25,41 +27,47 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="signup-page p-8 max-w-md mx-auto">
-      <h2 className="text-center text-2xl mb-4">Sign Up</h2>
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-      <form onSubmit={handleSignup} className="flex flex-col gap-4">
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="p-2 border rounded"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="p-2 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="p-2 border rounded"
-          required
-        />
-        <button
-          type="submit"
-          className="p-2 bg-blue-500 text-grey rounded hover:bg-blue-600"
-        >
-          Sign Up
-        </button>
-      </form>
-    </div>
+    <Container className="d-flex justify-content-center py-5">
+      <Card style={{ maxWidth: "400px", width: "100%" }} className="shadow-sm">
+        <Card.Body>
+          <img
+              alt="logo"
+              src="/signup.png"
+              width="50"
+              height="50"
+              className="me-2"
+            />
+            <h2 className="fw-bold text-dark d-inline">Sign Up </h2>
+
+          {error && <Alert variant="danger">{error}</Alert>}
+
+          <Form onSubmit={handleSignup}>
+            <Form.Group className="mb-3">
+              <Form.Control
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Control
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            <Button type="submit" variant="info" className="w-100">
+              Sign Up
+            </Button>
+          </Form>
+        </Card.Body>
+      </Card>
+    </Container>
   );
 }

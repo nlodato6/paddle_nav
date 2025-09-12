@@ -1,4 +1,3 @@
-// src/components/EditLocationForm.jsx
 import { useState } from "react";
 import { Form, Button, Spinner } from "react-bootstrap";
 import { editLocation } from "../api/authApi";
@@ -12,6 +11,7 @@ export default function EditLocationForm({ location, onSuccess, onCancel }) {
     address: location.address || "",
     city: location.city || "",
     state: location.state || "FL",
+    phone_number: location.phone_number || "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -111,6 +111,17 @@ export default function EditLocationForm({ location, onSuccess, onCancel }) {
           name="state"
           value={formData.state}
           onChange={handleChange}
+        />
+      </Form.Group>
+
+      <Form.Group className="mb-3">
+        <Form.Label>Phone Number</Form.Label>
+        <Form.Control
+          type="text"
+          name="phone_number"
+          value={formData.phone_number}
+          onChange={handleChange}
+          placeholder="e.g. 555-123-4567"
         />
       </Form.Group>
 

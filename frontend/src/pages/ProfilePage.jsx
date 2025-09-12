@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Form, Button, Alert, Container, Card, Col } from "react-bootstrap";
 
 export default function ProfilePage() {
   const [username, setUsername] = useState("");
@@ -12,14 +13,15 @@ export default function ProfilePage() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // Fetch current user info
     const fetchUser = async () => {
       try {
         const res = await axios.get("http://localhost/api/accounts/me", {
           headers: { Authorization: `Token ${token}` },
         });
+        console.log("User API response:", res.data); 
+        
         setUsername(res.data.username);
-        setEmail(res.data.email);
+        setEmail(res.data.email); 
       } catch (err) {
         console.error(err);
       }
@@ -38,7 +40,7 @@ export default function ProfilePage() {
     }
 
     try {
-      const res = await axios.patch(
+      await axios.patch(
         "http://localhost/api/accounts/me",
         { email, ...(password ? { password } : {}) },
         { headers: { Authorization: `Token ${token}` } }
@@ -53,57 +55,87 @@ export default function ProfilePage() {
     }
   };
 
-  return (
-    <div className="max-w-md mx-auto p-8">
-      <h2 className="text-2xl font-bold mb-4 text-center">
-           <img
-            alt="logo"
-            src="/profile.png"
-            width="50"
-            height="50"
-            className="d-inline-block align-top"
-          />{" "}
-        Profile</h2>
-        
-      {message && <p className="text-green-500 mb-2">{message}</p>}
-      {error && <p className="text-red-500 mb-2">{error}</p>}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input
-          type="text"
-          value={username}
-          disabled
-          className="p-2 border rounded bg-gray-100 cursor-not-allowed"
-        />
-        <input
-          type="email"
-          value={email}
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          className="p-2 border rounded"
-          required
-        />
-        <input
-          type="password"
-          value={password}
-          placeholder="New password"
-          onChange={(e) => setPassword(e.target.value)}
-          className="p-2 border rounded"
-        />
-        <input
-          type="password"
-          value={confirmPassword}
-          placeholder="Confirm new password"
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="p-2 border rounded"
-        />
-        <button
-          type="submit"
-          className="p-2 bg-blue-500 text-grey rounded hover:bg-blue-600"
-        >
-          Update Profile
-        </button>
-      </form>
-    </div>
+  if (!token) {
+      return (
+        <Container fluid className="bg-light min-vh-100 py-5">
+    
+              <Col className="d-flex align-items-center">
+               <img
+              alt="logo"
+              src="/profile.png"
+              width="50"
+              height="50"
+              className="me-2"
+            />
+            <h2 className="fw-bold text-dark m-4">Profile</h2>
+              </Col>
+           
+            <Card className="text-center p-5 shadow-sm">
+              <Card.Body>
+                <Card.Text className="text-muted mb-4">
+                  Please login to view Profile.
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          
+        </Container>
+      );
+    }
+
+  return (
+    <Container className="py-5">
+      <Card className="shadow-sm mx-auto" style={{ maxWidth: "500px" }}>
+        <Card.Body>
+          <div className="text-center mb-4">
+            <img
+              alt="logo"
+              src="/profile.png"
+              width="50"
+              height="50"
+              className="me-2"
+            />
+            <h2 className="fw-bold text-dark d-inline">Profile</h2>
+          </div>
+
+          {/* Alerts */}
+          {message && <Alert variant="success">{message}</Alert>}
+          {error && <Alert variant="danger">{error}</Alert>}
+
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Username</Form.Label>
+              <Form.Control type="text" value={username} disabled readOnly />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={password}
+                placeholder="Enter new password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Confirm New Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={confirmPassword}
+                placeholder="Confirm new password"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </Form.Group>
+
+            <div className="d-grid">
+              <Button type="submit" variant="info">
+                Update Profile
+              </Button>
+            </div>
+          </Form>
+        </Card.Body>
+      </Card>
+    </Container>
   );
 }

@@ -263,50 +263,50 @@ class FavoriteLocation(APIView):
         if pk:
             location = get_object_or_404(RecreationArea, pk=pk)
 
-        # Case 2: Favoriting by external API OBJECTID
-        elif OBJECTID:
-            location = RecreationArea.objects.filter(OBJECTID=OBJECTID).first()
-            if not location:
-                # fetch from API and store locally if not exists
-                try:
-                    api_url = (
-                        f"https://ca.dep.state.fl.us/arcgis/rest/services/"
-                        f"OpenData/PARKS_FORI/MapServer/0/query?where=OBJECTID={OBJECTID}"
-                        "&outFields=*&outSR=4326&f=json"
-                    )
-                    api_response = requests.get(api_url, timeout=15)
-                    api_response.raise_for_status()
-                    arcgis_data = api_response.json()
+        # # Case 2: Favoriting by external API OBJECTID
+        # elif OBJECTID:
+        #     location = RecreationArea.objects.filter(OBJECTID=OBJECTID).first()
+        #     if not location:
+        #         # fetch from API and store locally if not exists
+        #         try:
+        #             api_url = (
+        #                 f"https://ca.dep.state.fl.us/arcgis/rest/services/"
+        #                 f"OpenData/PARKS_FORI/MapServer/0/query?where=OBJECTID={OBJECTID}"
+        #                 "&outFields=*&outSR=4326&f=json"
+        #             )
+        #             api_response = requests.get(api_url, timeout=15)
+        #             api_response.raise_for_status()
+        #             arcgis_data = api_response.json()
 
-                    features = arcgis_data.get("features")
-                    if not features:
-                        return Response(
-                            {"error": "Official location not found."},
-                            status=status.HTTP_404_NOT_FOUND
-                        )
+        #             features = arcgis_data.get("features")
+        #             if not features:
+        #                 return Response(
+        #                     {"error": "Official location not found."},
+        #                     status=status.HTTP_404_NOT_FOUND
+        #                 )
 
-                    feature = features[0]
-                    attrs = feature.get("attributes", {})
-                    geometry = feature.get("geometry", {})
+        #             feature = features[0]
+        #             attrs = feature.get("attributes", {})
+        #             geometry = feature.get("geometry", {})
 
-                    location = RecreationArea.objects.create(
-                        OBJECTID=OBJECTID,
-                        name=attrs.get("SITE_NAME", "Unnamed Location"),
-                        description=attrs.get("DESCRIPTION") or "",
-                        address=attrs.get("LOCATION") or "",
-                        city=attrs.get("COUNTY") or "",
-                        state="FL",
-                        zip_code=attrs.get("ZIPCODE"),
-                        phone_number=attrs.get("PHONE"),
-                        geom=Point(geometry["x"], geometry["y"]) if geometry else None,
-                        is_official_data=True,
-                    )
+        #             location = RecreationArea.objects.create(
+        #                 OBJECTID=OBJECTID,
+        #                 name=attrs.get("SITE_NAME", "Unnamed Location"),
+        #                 description=attrs.get("DESCRIPTION") or "",
+        #                 address=attrs.get("LOCATION") or "",
+        #                 city=attrs.get("COUNTY") or "",
+        #                 state="FL",
+        #                 zip_code=attrs.get("ZIPCODE"),
+        #                 phone_number=attrs.get("PHONE"),
+        #                 geom=Point(geometry["x"], geometry["y"]) if geometry else None,
+        #                 is_official_data=True,
+        #             )
 
-                except requests.RequestException as e:
-                    return Response(
-                        {"error": f"Failed to fetch official location data: {e}"},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                    )
+        #         except requests.RequestException as e:
+        #             return Response(
+        #                 {"error": f"Failed to fetch official location data: {e}"},
+        #                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        #             )
 
         # Add to favorites
         if not location.favorited_by.filter(id=user.id).exists():
@@ -318,6 +318,52 @@ class FavoriteLocation(APIView):
             code = status.HTTP_200_OK
 
         return Response({"message": message}, status=code)
+    
+class FavoriteOfficialLocation(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        object_id = request.data.get("OBJECTID")
+        name = request.data.get("name", f"Official Location {object_id}")
+
+        if not object_id:
+            return Response({"error": "OBJECTID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Find or create the RecreationArea with this OBJECTID
+        location, created = RecreationArea.objects.get_or_create(
+            OBJECTID=object_id,
+            defaults={
+                "name": name,
+                "is_official_data": True,
+            }
+        )
+
+        # Add the current user to favorited_by
+        location.favorited_by.add(request.user)
+
+        serializer = RecreationAreaSerializer(location, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UnfavoriteOfficialLocation(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        object_id = request.data.get("OBJECTID")
+
+        if not object_id:
+            return Response({"error": "OBJECTID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            location = RecreationArea.objects.get(OBJECTID=object_id, is_official_data=True)
+        except RecreationArea.DoesNotExist:
+            return Response({"error": "Official location not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Remove the current user from favorited_by
+        location.favorited_by.remove(request.user)
+
+        serializer = RecreationAreaSerializer(location, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UnfavoriteLocation(APIView):
     """

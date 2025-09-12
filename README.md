@@ -4,11 +4,11 @@
 PaddleNav is a full-stack web application designed to manage and display locations with a focus on geographic data. The application consists of a React frontend, a Django backend API, a PostGIS database, and an Nginx reverse proxy, all orchestrated with Docker Compose for a seamless development and deployment experience.
 
 ### Features
-Create, edit, and favorite recreation areas
-User authentication with token-based login
-Manage personal locations with CRUD functionality
-AI-powered floating chatbot (Google Gemini integration)
-Integration with official ArcGIS data and NOAA tide stations
+- Create, edit, and favorite recreation areas
+- User authentication with token-based login
+- Manage personal locations with CRUD functionality
+- AI-powered floating chatbot (Google Gemini integration)
+- Integration with official ArcGIS data and NOAA tide stations
 
 ### Technology Stack
 Frontend: React, Vite
@@ -26,31 +26,62 @@ API Communication: Axios
 ### Internal API
 Authentication
 
-    POST /api/accounts/api-token-auth/ → Get token
+    POST /api/accounts/api-token-auth/ → Login and get token
+        Body: { "username": "...", "password": "..." }
+        Response: { "token": "..." }
         Token must be sent as Authorization: Token <your_token>
+
+    POST /api/accounts/signup/ → Create a new user
+        Body: { "username": "...", "email": "...", "password": "..." }
 
 Locations
 
-    GET /api/fsp/ → List all locations
+    GET /api/fsp/ → List all locations (DB + official data if stored)
 
     POST /api/fsp/locations/create/ → Create a new user location
+
+    GET /api/fsp/locations/{id}/ → Get a location by ID (backend only)
 
     PUT /api/fsp/locations/{id}/edit/ → Update a location (full update)
 
     PATCH /api/fsp/locations/{id}/edit/ → Update a location (partial update)
 
+    DELETE /api/fsp/locations/{id}/delete/ → Delete a user-created location
+
 Favorites
 
-    POST /api/favorites/{id}/ → Favorite a location
+    POST /api/fsp/locations/{id}/favorite/ → Favorite a DB location
 
-    DELETE /api/favorites/{id}/ → Unfavorite a location
+    DELETE /api/fsp/locations/{id}/unfavorite/ → Unfavorite a DB location
 
-    GET /api/favorites/ → List user favorites
+    POST /api/fsp/locations/api_favorite/ → Favorite an official (API) location
+        Body: { "OBJECTID": "...", "name": "..." }
+
+    POST /api/fsp/locations/api_unfavorite/ → Unfavorite an official (API) location
+        Body: { "OBJECTID": "..." }
+
+    GET /api/fsp/locations/favorites/ → List user favorites
+
+Database Tables
+
+    GET /api/fsp/db/categories/ → List location categories
+
+    GET /api/fsp/db/recreation-types/ → List recreation types
+
+    ET /api/fsp/db/metstations/ → List metstations
 
 AI Tools
     POST /api/ai_tools/generate/
         Body: { "prompt": "your text" }
         Returns AI-generated text using Gemini
+    
+    POST /api/ai_tools/tides/
+        Body: { "station_id": "8726520", "begin_date": "20250807", "end_date": "20250807" }
+        Returns Gemini-generated summary of NOAA tide data
+    
+    POST /api/ai_tools/water_atlas/
+        Body: { "station_id": "8726520", "begin_date": "20250807", "end_date": "20250807" }
+        Returns Gemini-generated summary of USF Water Atlas data
 
 ### Third-Party APIs
 
@@ -97,13 +128,45 @@ This command modifies the file's permissions, making it runnable as a program.
 ### What the run-compose-dev.sh Script Does
 This single script automates the entire project setup, saving you from running multiple commands manually.
 
-1. docker compose -f docker-compose.dev.yml up -d --build: This command reads the docker-compose.dev.yml file, which defines your services, networks, and volumes. It builds the necessary Docker images and starts all services (the Django API, the PostgreSQL database, and Nginx) in detached mode (-d). The --build flag ensures that the images are rebuilt if any changes have been made to the Dockerfiles.
+1. Start Docker services
 
-2. sleep 10: This is a critical step. It introduces a 10-second pause to give the PostgreSQL database container sufficient time to fully initialize and become ready for connections.
+    docker compose -f docker-compose.dev.yml up -d --build
 
-3. docker exec paddle_nav-api-1 python /src/manage.py makemigrations and docker exec paddle_nav-api-1 python /src/manage.py migrate: These commands run Django's database migration commands directly inside the api container. This ensures your database schema is up-to-date with your application's models.
+    - Reads the docker-compose.dev.yml file to define services, networks, and volumes.
+    - Builds the necessary Docker images and starts all services (the Django API, PostgreSQL database, and Nginx) in detached mode (-d).
+    - The --build flag ensures that the images are rebuilt if any changes have been made to the Dockerfiles.
 
-4. cd ./frontend and npm run dev: The script navigates to the frontend directory and then runs the dev script defined in your package.json file. This starts the frontend's development server, typically powered by a tool like Vite.
+2. Wait for PostgreSQL to initialize
+
+    sleep 10
+
+    -Adds a 10-second pause to give the Postgres container enough time to fully start.
+
+3. Apply Django migrations
+
+    docker exec paddle_nav-api-1 python /src/manage.py makemigrations
+    docker exec paddle_nav-api-1 python /src/manage.py migrate
+
+    - Runs Django’s makemigrations and migrate inside the API container.
+    - Ensures the database schema is up-to-date with the application models.
+
+4. Load initial SQL seed data
+
+    docker cp ./backend/init.sql paddle_nav-db-1:/tmp/init.sql
+    docker exec -it paddle_nav-db-1 psql -U postgres -d paddle_nav_db -f /tmp/init.sql
+
+    - Copies your init.sql seed file into the Postgres container.
+    - Executes it against the paddle_nav_db database, preloading tables with initial data (categories, recreation types, stations, etc).
+
+5. Start the frontend
+
+    cd ./frontend
+    npm install
+    npm audit fix
+    npm run dev
+
+    - Installs frontend dependencies and applies quick fixes for known vulnerabilities.
+    - Starts the frontend development server (Vite), making the app available at http://localhost:5173.
 
 ### Usage
 Once all services are running, you can access the application at the following URLs:

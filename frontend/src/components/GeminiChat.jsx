@@ -1,4 +1,3 @@
-// src/components/FloatingChat.jsx
 import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { generateGeminiText } from "../api/authApi";
@@ -54,8 +53,15 @@ export default function FloatingChat() {
           }}
         >
           {/* Header */}
-          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <span>Chat with Gemini</span>
+          <div className="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <img
+                alt="logo"
+                src="/chat_bot.png"
+                width="50"
+                height="50"
+                className="me-2"
+              />
+            <span>Paddle Assistant </span>
             <button
               type="button"
               className="btn-close btn-close-white"
@@ -104,7 +110,7 @@ export default function FloatingChat() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                 />
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-info">
                   Send
                 </button>
               </div>
@@ -116,7 +122,7 @@ export default function FloatingChat() {
       {/* Floating Button */}
       <button
         type="button"
-        className="btn btn-primary rounded-circle shadow position-fixed"
+        className="btn btn-info rounded-circle shadow position-fixed"
         style={{
           bottom: "20px",
           right: "20px",

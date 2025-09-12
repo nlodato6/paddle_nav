@@ -113,20 +113,32 @@ export const favoriteLocation = async (id) => {
   }
 };
 
-// Favorite an external API location (ArcGIS)
-export const favoriteOfficialLocation = async (objectId) => {
+// Favorite API location
+export const favoriteOfficialLocation = async (objectId, name) => {
+  console.log("Favoriting API location:", objectId, name);
   const token = localStorage.getItem("token");
   const res = await axios.post(
-    `${API_URL}/official-locations/${objectId}/favorite/`,
-    {},
+    `${BASE_URL}/locations/api_favorite/`,
+    { OBJECTID: objectId, name },
     { headers: { Authorization: `Token ${token}` } }
   );
   return res.data;
 };
 
 
+// Unfavorite API location
+export const unfavoriteOfficialLocation = async (objectId) => {
+  const token = localStorage.getItem("token");
+  const res = await axios.post(
+    `${BASE_URL}/locations/api_unfavorite/`,
+    { OBJECTID: objectId },
+    { headers: { Authorization: `Token ${token}` } }
+  );
+  return res.data;
+};
 
-// Unfavorite a location
+
+// Unfavorite DB locaiton
 export const unfavoriteLocation = async (id) => {
   try {
     const res = await axios.delete(`${BASE_URL}/locations/${id}/unfavorite/`, {
@@ -138,6 +150,7 @@ export const unfavoriteLocation = async (id) => {
     throw error;
   }
 };
+
 
 //User Create new location
 export const createLocation = async (data) => {

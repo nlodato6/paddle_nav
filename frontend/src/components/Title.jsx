@@ -1,4 +1,3 @@
-// src/components/Title.jsx
 import { useState, useEffect } from "react";
 import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
@@ -22,7 +21,7 @@ function Title() {
      localStorage.removeItem("token");
     localStorage.removeItem("username");
     setIsLoggedIn(false);
-    navigate("/"); // optional: redirect to home after logout
+    navigate("/locations"); 
     setUsername("");
     window.location.reload()
   };

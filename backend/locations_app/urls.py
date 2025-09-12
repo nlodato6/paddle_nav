@@ -6,6 +6,8 @@ from .views import (
     CreateLocation,
     FavoriteLocation,
     UnfavoriteLocation,
+    FavoriteOfficialLocation,
+    UnfavoriteOfficialLocation,
     DeleteLocation,
     CreateComment,
     DeleteComment,
@@ -32,8 +34,11 @@ urlpatterns = [
     path('locations/<int:pk>/delete/', DeleteLocation.as_view(), name='delete-location'),
 
     path('locations/<int:pk>/favorite/', FavoriteLocation.as_view(), name='favorite_location'),
-    path('locations/api_favorite/', FavoriteLocation.as_view(), name='favorite_official_location'),
     path('locations/<int:pk>/unfavorite/', UnfavoriteLocation.as_view(), name='unfavorite-location'),
+    path('locations/api_favorite/', FavoriteOfficialLocation.as_view(), name='favorite_official_location'),
+    path('locations/api_unfavorite/', UnfavoriteOfficialLocation.as_view(), name='unfavorite_official_location'),
+
+    #Not working
     path('locations/<int:pk>/comments/create/', CreateComment.as_view(), name='create-comment'),
     path('comments/<int:pk>/delete/', DeleteComment.as_view(), name='delete-comment'),
 

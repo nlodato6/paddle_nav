@@ -10,6 +10,7 @@ export default function CoastalConditions() {
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
+  const token = localStorage.getItem("token");
 
 
   useEffect(() => {
@@ -57,12 +58,42 @@ const handleSubmit = async (e) => {
   }
 };
 
+if (!token) {
+    return (
+      <Container fluid className="bg-light min-vh-100 py-5">
+  
+            <Col className="d-flex align-items-center">
+             <img alt="logo" 
+             src="/water.png" 
+             width="50" 
+             height="50" 
+             className="me-2" 
+             />
+          <h2 className="fw-bold text-dark d-inline m-4">Coastal Conditions</h2>
+            </Col>
+         
+          <Card className="text-center p-5 shadow-sm">
+            <Card.Body>
+              <Card.Text className="text-muted mb-4">
+                Please login to see Coastal Conditions.
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        
+      </Container>
+    );
+  }
 
   return (
     <Container fluid className="bg-light min-vh-100 py-5">
       <Row className="mb-4 align-items-center">
         <Col>
-          <img alt="logo" src="/water.png" width="50" height="50" className="me-2" />
+          <img alt="logo" 
+          src="/water.png" 
+          width="50" 
+          height="50" 
+          className="me-2" 
+          />
           <h2 className="fw-bold text-dark d-inline">Coastal Conditions</h2>
         </Col>
       </Row>
@@ -111,8 +142,8 @@ const handleSubmit = async (e) => {
               </Col>
 
               <Col md={2} className="d-flex align-items-end">
-                <Button type="submit" variant="primary" className="w-100">
-                  {loading ? <Spinner animation="border" size="sm" /> : "Get Tides"}
+                <Button type="submit" variant="info" className="w-100">
+                  {loading ? <Spinner animation="border" size="sm" /> : "Get Conditions"}
                 </Button>
               </Col>
             </Row>

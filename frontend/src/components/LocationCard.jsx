@@ -1,4 +1,3 @@
-// src/components/LocationCard.jsx
 import { useState } from "react";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
@@ -6,6 +5,8 @@ import {
   favoriteLocation,
   unfavoriteLocation,
   favoriteOfficialLocation,
+  unfavoriteOfficialLocation,
+  isLoggedIn
 } from "../api/authApi";
 
 const LocationCard = ({ location, onFavoriteChange, showEdit = false, onEdit }) => {
@@ -14,36 +15,41 @@ const LocationCard = ({ location, onFavoriteChange, showEdit = false, onEdit }) 
 
   if (!location) return null;
 
-  const handleFavoriteClick = async () => {
-    setLoading(true);
-    try {
-      if (!isFavorited) {
-        if (location.id) {
-          // Local DB location
-          await favoriteLocation(location.id);
-        } else if (location.OBJECTID) {
-          // API location
-          await favoriteOfficialLocation(location.OBJECTID);
-        } else {
-          throw new Error("No id or OBJECTID provided");
-        }
-        setIsFavorited(true);
+const handleFavoriteClick = async () => {
+  setLoading(true);
+  try {
+    if (!isFavorited) {
+      // FAVORITE
+      if (location.is_official_data === false && location.id) {
+        // DB location
+        await favoriteLocation(location.id);
+      } else if (location.is_official_data === true && location.OBJECTID) {
+        // API location
+        await favoriteOfficialLocation(location.OBJECTID, location.name);
       } else {
-        if (location.id) {
-          await unfavoriteLocation(location.id);
-        }
-        setIsFavorited(false);
+        throw new Error("Invalid location object");
       }
-
-      if (onFavoriteChange) {
-        onFavoriteChange(location.id || location.OBJECTID, !isFavorited);
+      setIsFavorited(true);
+    } else {
+      // UNFAVORITE
+      if (location.is_official_data === false && location.id) {
+        await unfavoriteLocation(location.id);
+      } else if (location.is_official_data === true && location.OBJECTID) {
+        await unfavoriteOfficialLocation(location.OBJECTID);
       }
-    } catch (error) {
-      console.error("Error updating favorite:", error);
-    } finally {
-      setLoading(false);
+      setIsFavorited(false);
     }
-  };
+
+    if (onFavoriteChange) {
+      onFavoriteChange(location.id || location.OBJECTID, !isFavorited);
+    }
+  } catch (error) {
+    console.error("Error updating favorite:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <Card className="mb-4 shadow-sm">
@@ -55,18 +61,19 @@ const LocationCard = ({ location, onFavoriteChange, showEdit = false, onEdit }) 
 
         {/* Details */}
         <div className="p-3 border rounded bg-light">
+          <p><strong>Recreation Category:</strong> {location.recreation_type || "N/A"}</p>
+          <p><strong>Location Category:</strong> {location.location_category || "N/A"}</p>
           <p><strong>Description:</strong> {location.description || "N/A"}</p>
           <p><strong>Address:</strong> {location.address || "N/A"}</p>
           <p><strong>City:</strong> {location.city || "N/A"}</p>
           <p><strong>State:</strong> {location.state || "N/A"}</p>
           <p><strong>Zip Code:</strong> {location.zip_code || "N/A"}</p>
           <p><strong>Phone:</strong> {location.phone_number || "N/A"}</p>
-          <p><strong>Recreation Category:</strong> {location.recreation_type || "N/A"}</p>
-          <p><strong>Location Category:</strong> {location.location_category || "N/A"}</p>
-          <p><strong>Favorited by:</strong> {location.favorited_by_count || 0}</p>
+          
 
-          {/* Actions */}
+          
           <div className="d-flex justify-content-evenly mt-3">
+            {isLoggedIn() && (
             <Button
               variant={isFavorited ? "danger" : "success"}
               onClick={handleFavoriteClick}
@@ -74,6 +81,7 @@ const LocationCard = ({ location, onFavoriteChange, showEdit = false, onEdit }) 
             >
               {isFavorited ? "Unfavorite" : "Favorite"}
             </Button>
+            )}
 
             {showEdit && (
               <Button

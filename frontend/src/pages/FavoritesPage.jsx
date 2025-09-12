@@ -50,7 +50,7 @@ export default function FavoritesPage() {
                 height="50"
                 className="me-2"
               />
-              <h2 className="fw-bold text-dark m-0">Favorites</h2>
+              <h2 className="fw-bold text-dark m-4">Favorites</h2>
             </Col>
          
           <Card className="text-center p-5 shadow-sm">

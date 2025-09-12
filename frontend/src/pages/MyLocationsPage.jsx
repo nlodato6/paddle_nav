@@ -10,6 +10,7 @@ export default function MyLocations() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false); // create location form
   const [editingLocation, setEditingLocation] = useState(null); // edit location form
+  const token = localStorage.getItem("token");
 
   const username = localStorage.getItem("username");
 
@@ -39,6 +40,33 @@ export default function MyLocations() {
     setShowForm((prev) => !prev); // ✅ Toggle the form
   };
 
+  if (!token) {
+      return (
+        <Container fluid className="bg-light min-vh-100 py-5">
+    
+              <Col className="d-flex align-items-center">
+               <img
+              alt="logo"
+              src="/mylocations.png"
+              width="50"
+              height="50"
+              className="me-2"
+            />
+            <h2 className="fw-bold text-dark m-4">My Locations</h2>
+              </Col>
+           
+            <Card className="text-center p-5 shadow-sm">
+              <Card.Body>
+                <Card.Text className="text-muted mb-4">
+                  Please login to see your locations.
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          
+        </Container>
+      );
+    }
+
   return (
     <Container fluid className="bg-light min-vh-100 py-5">
      
@@ -54,9 +82,9 @@ export default function MyLocations() {
             />
             <h2 className="fw-bold text-dark m-0">My Locations</h2>
           </Col>
-          
+
           <Col className="text-end">
-            <Button variant="primary" onClick={handleCreateClick}>
+            <Button variant="info" onClick={handleCreateClick}>
               {showForm ? "Cancel" : "Create New Location"}
             </Button>
           </Col>
@@ -115,7 +143,7 @@ export default function MyLocations() {
                 <Card.Text className="text-muted mb-4">
                   You have not created any locations yet.
                 </Card.Text>
-                <Button variant="primary" onClick={handleCreateClick}>
+                <Button variant="info" onClick={handleCreateClick}>
                   Create Your First Location
                 </Button>
               </Card.Body>
