@@ -26,6 +26,12 @@ services:
 
   db:
     image: imresamu/postgis:16-3.5-bullseye
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h http://3.15.164.141"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
