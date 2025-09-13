@@ -7,7 +7,7 @@
 docker compose -f docker-compose.dev.yml up -d --build
 
 # make sure the postgres container is ready, then run migrations
-Echo 'DB starting...'
+echo 'DB starting...'
 
 sleep 10 
 
@@ -19,9 +19,9 @@ docker exec paddle_nav-api-1  python /src/manage.py migrate
 
 sleep 5
 
-Echo 'Migrations made'
+echo 'Migrations made'
 
-Echo "Copying sql files to the container..."
+echo "Copying sql files to the container..."
 docker cp ./backend/init.sql paddle_nav-db-1:/tmp/init.sql
 
 sleep 5
@@ -32,12 +32,12 @@ docker exec -it paddle_nav-db-1 psql -U postgres -d paddle_nav_db -f /tmp/init.s
 
 sleep 5
 
-Echo 'DB loaded'
+echo 'DB loaded'
 
 
 
 #start frontend
-Echo 'Starting Frontend'
+echo 'Starting Frontend'
 
 cd ./frontend 
 npm install
