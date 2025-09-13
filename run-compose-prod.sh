@@ -4,7 +4,7 @@
 docker-compose -f docker-compose.prod.yml pull
 docker-compose -f docker-compose.prod.yml up -d
 
-
+# make sure the postgres container is ready, then run migrations
 echo "Creating new migrations for app..."
 docker-compose -f docker-compose.prod.yml exec -T api python manage.py makemigrations
 
@@ -12,13 +12,8 @@ echo "Applying database migrations..."
 docker-compose -f docker-compose.prod.yml exec -T api python manage.py migrate
 
 
-echo "Copying sql files to the container..."
-docker cp ./backend/init.sql paddle_nav_db-1:/tmp/init.sql
+# Echo "Copying sql files to the container..."
+# docker cp ./backend/init.sql paddle_nav-db-1:/tmp/init.sql
 
-echo "Importing init.sql data to the database..."
-docker exec -it paddle_nav_db-1 psql -U postgres -d paddle_nav_db -f /tmp/init.sql
-
-
-sleep 5
-
-echo 'DB loaded'
+# echo "Importing init.sql data to the database..."
+# docker exec -it paddle_nav-db-1 psql -U postgres -d paddle_nav_db -f /tmp/init.sql

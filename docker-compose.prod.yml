@@ -2,7 +2,7 @@ version: "3"
 
 services:
   api:
-    image: nlodato6/paddle-nav-api:1.0.6
+    image: nlodato6/paddle-nav-api:1.0.7
     env_file:
       - .env.prod
     depends_on:
@@ -19,7 +19,7 @@ services:
       - "8000"
 
   nginx:
-    image: nlodato6/paddle-nav-web:1.0.6
+    image: nlodato6/paddle-nav-web:1.0.7
     restart: always
     ports:
       - "80:80"
