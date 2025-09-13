@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from 'react-router-dom'; // REMOVE BrowserRouter here
+import { Routes, Route, Navigate } from 'react-router-dom'; // REMOVE BrowserRouter here
 
 import Title from "./components/Title";
 import LeftNavBar from "./components/LeftNavBar";
@@ -26,6 +26,8 @@ function App() {
         <div style={{ flex: 1, padding: "20px" }}>
           {/* ONLY Routes, no Router here */}
           <Routes>
+            <Route path="/" element={<Navigate to="/locations" replace />} />
+
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/locations" element={<LocationsPage />} />

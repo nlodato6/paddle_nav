@@ -18,12 +18,16 @@ function Title() {
 
   const handleLogout = () => {
     logout();
-     localStorage.removeItem("token");
+    localStorage.removeItem("token");
     localStorage.removeItem("username");
-    setIsLoggedIn(false);
-    navigate("/locations"); 
+    setIsLoggedIn(false); 
     setUsername("");
-    window.location.reload()
+
+    if (axios?.defaults?.headers?.common?.Authorization) {
+      delete axios.defaults.headers.common.Authorization;
+    }
+    window.location.href = `${window.location.origin}/locations`;
+  
   };
 
   return (
