@@ -2,7 +2,7 @@ version: "3"
 
 services:
   api:
-    image: nlodato6/paddle-nav-api:1.0.5
+    image: nlodato6/paddle-nav-api:latest
     depends_on:
       - db
     environment:
@@ -17,7 +17,7 @@ services:
       - "8000"
 
   nginx:
-    image: nlodato6/paddle-nav-web:1.0.5
+    image: nlodato6/paddle-nav-web:latest
     restart: always
     ports:
       - "80:80"
