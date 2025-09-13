@@ -4,6 +4,7 @@
 docker-compose -f docker-compose.prod.yml pull
 docker-compose -f docker-compose.prod.yml up -d
 
+sleep 10
 # make sure the postgres container is ready, then run migrations
 echo "Creating new migrations for app..."
 docker-compose -f docker-compose.prod.yml exec -T api python manage.py makemigrations

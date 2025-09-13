@@ -2,9 +2,7 @@ version: "3"
 
 services:
   api:
-    image: nlodato6/paddle-nav-api:1.0.7
-    env_file:
-      - .env.prod
+    image: nlodato6/paddle-nav-api:1.1.0
     depends_on:
       - db
     environment:
@@ -19,7 +17,7 @@ services:
       - "8000"
 
   nginx:
-    image: nlodato6/paddle-nav-web:1.0.7
+    image: nlodato6/paddle-nav-web:1.1.0
     restart: always
     ports:
       - "80:80"
@@ -29,7 +27,7 @@ services:
   db:
     image: imresamu/postgis:16-3.5-bullseye
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h http://3.15.164.141"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d paddle_nav_db -h localhost"]
       interval: 3s
       timeout: 5s
       retries: 20
@@ -40,7 +38,7 @@ services:
       - POSTGRES_DB=paddle_nav_db
     volumes: 
       - postgres_data:/var/lib/postgresql/data
-      - 
+ 
 
 volumes:
   postgres_data:
