@@ -1,12 +1,10 @@
 #!/bin/sh
 
-# These environment variables come from command line arguments.
-# They are consumed by the docker-compose file.
-
-docker compose -f docker-compose.prod.yml build --no-cache
+# Build and start containers using production compose file
+docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 
 # make sure the postgres container is ready, then run migrations
-sleep 10 
-docker exec paddle_nav-api-1 python /src/manage.py makemigrations 
-docker exec paddle_nav-api-1 python /src/manage.py migrate
+sleep 10
+docker compose -f docker-compose.prod.yml exec api python manage.py makemigrations
+docker compose -f docker-compose.prod.yml exec api python manage.py migrate
