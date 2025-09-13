@@ -3,8 +3,8 @@
 # These environment variables come from command line arguments.
 # They are consumed by the docker-compose file.
 
-docker-compose -f docker-compose.prod.yml build --no-cache
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml build --no-cache
+docker compose -f docker-compose.prod.yml up -d
 
 # make sure the postgres container is ready, then run migrations
 sleep 10 
