@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Form, Button, Alert, Container, Card, Col } from "react-bootstrap";
+import AuthCheck from "../components/AuthCheck";
 
 export default function ProfilePage() {
   const [username, setUsername] = useState("");
@@ -55,47 +56,33 @@ export default function ProfilePage() {
     }
   };
 
-
-  if (!token) {
-      return (
-        <Container fluid className="bg-light min-vh-100 py-5">
-    
-              <Col className="d-flex align-items-center">
-               <img
-              alt="logo"
-              src="/profile.png"
-              width="50"
-              height="50"
-              className="me-2"
-            />
-            <h2 className="fw-bold text-dark m-4">Profile</h2>
-              </Col>
-           
-            <Card className="text-center p-5 shadow-sm">
-              <Card.Body>
-                <Card.Text className="text-muted mb-4">
-                  Please login to view Profile.
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          
-        </Container>
-      );
-    }
-
   return (
-    <Container className="py-5">
+  <>
+  <Container className="bg-light min-vh-100 py-5">
+    {/* Title */}  
+        <h2 className="fw-bold text-dark mb-4">
+          <img
+            alt="logo"
+            src="/profile.png"
+            width="50"
+            height="50"
+            className="me-2"
+          />
+          Profile
+        </h2>
+  <AuthCheck message="Please login to see your Profile.">
+    
       <Card className="shadow-sm mx-auto" style={{ maxWidth: "500px" }}>
         <Card.Body>
           <div className="text-center mb-4">
             <img
               alt="logo"
-              src="/profile.png"
-              width="50"
-              height="50"
+              src="/update.png"
+              width="35"
+              height="35"
               className="me-2"
             />
-            <h2 className="fw-bold text-dark d-inline">Profile</h2>
+            <h3 className="fw-bold text-dark d-inline">Update Profile</h3>
           </div>
 
           {/* Alerts */}
@@ -136,6 +123,9 @@ export default function ProfilePage() {
           </Form>
         </Card.Body>
       </Card>
+      </AuthCheck>
     </Container>
-  );
-}
+  
+  </>
+)
+};

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getLocations } from "../api/authApi";
 import LocationCard from "../components/LocationCard";
+import AuthCheck from "../components/AuthCheck";
 import CreateLocationsForm from "../components/CreateLocationForm";
 import EditLocationForm from "../components/EditLocationForm"; // ✅ import the edit form
 import { Container, Row, Col, Button, Spinner, Card } from "react-bootstrap";
@@ -37,58 +38,32 @@ export default function MyLocations() {
   }, [username]);
 
   const handleCreateClick = () => {
-    setShowForm((prev) => !prev); // ✅ Toggle the form
+    setShowForm((prev) => !prev); 
   };
 
-  if (!token) {
-      return (
-        <Container fluid className="bg-light min-vh-100 py-5">
-    
-              <Col className="d-flex align-items-center">
-               <img
-              alt="logo"
-              src="/mylocations.png"
-              width="50"
-              height="50"
-              className="me-2"
-            />
-            <h2 className="fw-bold text-dark m-4">My Locations</h2>
-              </Col>
-           
-            <Card className="text-center p-5 shadow-sm">
-              <Card.Body>
-                <Card.Text className="text-muted mb-4">
-                  Please login to see your locations.
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          
-        </Container>
-      );
-    }
 
   return (
     <Container fluid className="bg-light min-vh-100 py-5">
+        {/* Title */}  
+        <h2 className="fw-bold text-dark mb-4">
+          <img
+            alt="logo"
+            src="/mylocations.png"
+            width="50"
+            height="50"
+            className="me-2"
+          />
+          My Locations
+        </h2>
+    
+        <AuthCheck message="Please login to see your locations.">
      
-        {/* Title */}
-        <Row className="align-items-center mb-4">
-          <Col className="d-flex align-items-center">
-            <img
-              alt="logo"
-              src="/mylocations.png"
-              width="50"
-              height="50"
-              className="me-2"
-            />
-            <h2 className="fw-bold text-dark m-0">My Locations</h2>
-          </Col>
-
-          <Col className="text-end">
+         <Col className="text-end">
             <Button variant="info" onClick={handleCreateClick}>
               {showForm ? "Cancel" : "Create New Location"}
             </Button>
           </Col>
-        </Row>
+    
 
         {/* Show Create Form */}
         {showForm && (
@@ -150,7 +125,7 @@ export default function MyLocations() {
             </Card>
           )
         )}
-      
+      </AuthCheck>
     </Container>
   );
 }

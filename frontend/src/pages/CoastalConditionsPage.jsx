@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Container, Row, Col, Form, Button, Spinner, Card } from "react-bootstrap";
- import { getMetStations, getTideSummary, getWaterAtlasSummary } from "../api/authApi";
+import { getMetStations, getTideSummary, getWaterAtlasSummary } from "../api/authApi";
+import AuthCheck from "../components/AuthCheck";
 
 export default function CoastalConditions() {
   const [stations, setStations] = useState([]);
@@ -58,45 +58,20 @@ const handleSubmit = async (e) => {
   }
 };
 
-if (!token) {
-    return (
-      <Container fluid className="bg-light min-vh-100 py-5">
-  
-            <Col className="d-flex align-items-center">
-             <img alt="logo" 
-             src="/water.png" 
-             width="50" 
-             height="50" 
-             className="me-2" 
-             />
-          <h2 className="fw-bold text-dark d-inline m-4">Coastal Conditions</h2>
-            </Col>
-         
-          <Card className="text-center p-5 shadow-sm">
-            <Card.Body>
-              <Card.Text className="text-muted mb-4">
-                Please login to see Coastal Conditions.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        
-      </Container>
-    );
-  }
 
   return (
     <Container fluid className="bg-light min-vh-100 py-5">
-      <Row className="mb-4 align-items-center">
-        <Col>
+       <h2 className="fw-bold text-dark d-inline">
+
           <img alt="logo" 
           src="/water.png" 
           width="50" 
           height="50" 
           className="me-2" 
           />
-          <h2 className="fw-bold text-dark d-inline">Coastal Conditions</h2>
-        </Col>
-      </Row>
+      Coastal Conditions</h2>
+      
+    <AuthCheck message="Please login to see Coastal Condions.">
 
       <Card className="shadow-sm mb-4">
         <Card.Body>
@@ -163,7 +138,7 @@ if (!token) {
     </Card.Body>
   </Card>
 )}
-
+  </AuthCheck>
     </Container>
   );
 }
