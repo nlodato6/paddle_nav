@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost/api/fsp';
-const ACCOUNTS_URL = 'http://localhost/api/accounts'; 
-const AI_TOOLS_URL = 'http://localhost/api/ai_tools'; 
+
+const BASE_URL = 'http://3.15.164.141/api/fsp';
+const ACCOUNTS_URL = 'http://3.15.164.141/api/accounts'; 
+const AI_TOOLS_URL = 'http://3.15.164.141/api/ai_tools'; 
 
 //get token from localStorage
 export const getToken = () => localStorage.getItem("token");

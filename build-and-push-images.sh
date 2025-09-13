@@ -12,12 +12,12 @@
 
 # ./build-and-push-images.sh <VERSION>
 
-DOCKERHUB_UNAME=<nlodato6>
+DOCKERHUB_UNAME=nlodato6
 
 NEW_VERSION=$1
 
-docker buildx build --platform linux/amd64 -t $DOCKERHUB_UNAME/webserver-prod2:$NEW_VERSION -f webserver/Dockerfile . --no-cache
-docker push $DOCKERHUB_UNAME/webserver-prod2:$NEW_VERSION
+docker buildx build --platform linux/amd64 -t $DOCKERHUB_UNAME/paddle-nav-web:$NEW_VERSION -f webserver/Dockerfile . --no-cache 
+docker push $DOCKERHUB_UNAME/paddle-nav-web:$NEW_VERSION
 
-docker buildx build --platform linux/amd64  -t $DOCKERHUB_UNAME/api-prod2:$NEW_VERSION -f backend/Dockerfile ./backend --no-cache
-docker push $DOCKERHUB_UNAME/api-prod2:$NEW_VERSION
+docker buildx build --platform linux/amd64  -t $DOCKERHUB_UNAME/paddle-nav-api:$NEW_VERSION -f backend/Dockerfile ./backend --no-cache
+docker push $DOCKERHUB_UNAME/paddle-nav-api:$NEW_VERSION
